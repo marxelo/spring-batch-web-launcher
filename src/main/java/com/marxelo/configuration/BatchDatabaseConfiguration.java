@@ -1,4 +1,4 @@
-package com.example.batch;
+package com.marxelo.configuration;
 
 import javax.sql.DataSource;
 import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableBatchProcessing
-public class BatchConfig extends DefaultBatchConfigurer {
+public class BatchDatabaseConfiguration extends DefaultBatchConfigurer {
 
   @Override
   public void setDataSource(DataSource dataSource) {

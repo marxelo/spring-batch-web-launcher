@@ -1,4 +1,4 @@
-package com.example.batch;
+package com.marxelo.configuration;
 
 import java.util.Date;
 import org.slf4j.Logger;

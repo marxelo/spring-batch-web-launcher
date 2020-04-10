@@ -1,4 +1,4 @@
-package com.example.batch;
+package com.marxelo.configuration;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

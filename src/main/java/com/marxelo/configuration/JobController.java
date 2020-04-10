@@ -1,4 +1,4 @@
-package com.example.batch;
+package com.marxelo.configuration;
 
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;

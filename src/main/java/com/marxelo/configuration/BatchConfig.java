@@ -1,10 +1,11 @@
-package com.example.batch;
+package com.marxelo.configuration;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ExecutionContext;
@@ -21,12 +22,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-public class JobConfiguration {
+@EnableBatchProcessing
+@EnableScheduling
+public class BatchConfig {
 
-	static Resource[] resources = new Resource[] { new ClassPathResource("data1.csv"),
-			new ClassPathResource("data2.csv") };
+	static Resource[] resources =
+			new Resource[] {new ClassPathResource("data1.csv"), new ClassPathResource("data2.csv")};
 
 	@Autowired
 	private JobBuilderFactory jobs;
@@ -36,8 +40,8 @@ public class JobConfiguration {
 
 	@Bean
 	public FlatFileItemReader<String> itemReader() {
-		return new FlatFileItemReaderBuilder<String>().name("itemReader").lineMapper(new PassThroughLineMapper())
-				.build();
+		return new FlatFileItemReaderBuilder<String>().name("itemReader")
+				.lineMapper(new PassThroughLineMapper()).build();
 	}
 
 	@Bean
@@ -61,17 +65,17 @@ public class JobConfiguration {
 				JobParameters jobParameters = stepExecution.getJobParameters();
 
 				String processingDate = jobParameters.getString("processingDate");
-				System.out.println(
-					"processing date.....: " + processingDate);
+				System.out.println("processing date.....: " + processingDate);
 			}
 
 			@Nullable
 			@Override
 			public String process(final String item) {
 				final ExecutionContext executionContext = stepExecution.getExecutionContext();
-				final int resourceIndex = executionContext.getInt("MultiResourceItemReader.resourceIndex");
-				System.out.println(
-						"processing item = " + item + " coming from resource = " + resources[resourceIndex + 1]);
+				final int resourceIndex =
+						executionContext.getInt("MultiResourceItemReader.resourceIndex");
+				System.out.println("processing item = " + item + " coming from resource = "
+						+ resources[resourceIndex + 1]);
 				return item;
 			}
 		}
@@ -90,8 +94,8 @@ public class JobConfiguration {
 
 	@Bean
 	public Step step() {
-		return steps.get("step").<String, String>chunk(1).reader(multiResourceItemReader()).processor(itemProcessor())
-				.writer(itemWriter()).build();
+		return steps.get("step").<String, String>chunk(1).reader(multiResourceItemReader())
+				.processor(itemProcessor()).writer(itemWriter()).build();
 	}
 
 	@Bean
