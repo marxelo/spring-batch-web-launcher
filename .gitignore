@@ -42,3 +42,6 @@ target/**
 
 # Ignore vscode settings
 .settings
+
+.factorypath
+.classpath
