@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>batchScheduler</artifactId>
+    <artifactId>SpringBatchWebLauncher</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>batchScheduler</name>
-    <description>Demo project for Spring Boot</description>
+    <name>SpringBatchWebLauncher</name>
+    <description>Demo project for Spring Batch Web Launcher</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
