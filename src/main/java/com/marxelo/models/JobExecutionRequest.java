@@ -1,4 +1,4 @@
-package com.marxelo.configuration;
+package com.marxelo.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

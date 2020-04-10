@@ -32,7 +32,7 @@ public class MyApplication {
 
 		// Aguardar o último envio de métrica
 		try {
-			Thread.sleep(15000L);
+			Thread.sleep(15L);
 			LOGGER.info("awake");
 		} catch (InterruptedException e) {
 
