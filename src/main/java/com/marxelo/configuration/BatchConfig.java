@@ -1,8 +1,8 @@
 package com.marxelo.configuration;
 
 import javax.annotation.PreDestroy;
-import javax.sql.DataSource;
 
+import com.marxelo.steps.CreditItemProcessor;
 import com.marxelo.steps.DebitItemProcessor;
 import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
@@ -12,14 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -27,15 +23,11 @@ import org.springframework.batch.item.file.MultiResourceItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.batch.BasicBatchConfigurer;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -61,7 +53,7 @@ public class BatchConfig {
     // @Bean
     // public BatchConfigurer configurer(BatchProperties properties,
     //         @Qualifier("batchDataSource") DataSource dataSource) {
-    //     return new BasicBatchConfigurer(properties, dataSource, null) {
+    //     return new BasicBatchConfigurer(properties, null, null) {
     //         @Override
     //         public PlatformTransactionManager getTransactionManager() {
     //             return transactionManager;
@@ -71,8 +63,10 @@ public class BatchConfig {
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
-        return new FlatFileItemReaderBuilder<String>().name("itemReader")
-                .lineMapper(new PassThroughLineMapper()).build();
+        return new FlatFileItemReaderBuilder<String>()
+                .name("itemReader")
+                .lineMapper(new PassThroughLineMapper())
+                .build();
     }
 
     @Bean
@@ -84,24 +78,9 @@ public class BatchConfig {
     }
 
     @Bean
-    public ItemProcessor<String, String> itemProcessor() {
-
-        class MyItemProcessor implements ItemProcessor<String, String> {
-
-            private StepExecution stepExecution;
-
-            @Nullable
-            @Override
-            public String process(final String item) {
-                final ExecutionContext executionContext = stepExecution.getExecutionContext();
-                final int resourceIndex = executionContext.getInt("MultiResourceItemReader.resourceIndex");
-                LOGGER.info("processing item = " + item + " coming from resource = "
-                        + resources[resourceIndex + 1]);
-                return item;
-            }
-        }
-
-        return new MyItemProcessor();
+    public CreditItemProcessor creditItemProcessor() {
+        CreditItemProcessor processor = new CreditItemProcessor();
+        return processor;
     }
 
     @Bean
@@ -121,16 +100,26 @@ public class BatchConfig {
 
     @Bean
     public Step creditStep() {
-        return stepBuilderFactory.get("creditStep").<String, String> chunk(1).reader(multiResourceItemReader())
-                .processor(itemProcessor()).writer(itemWriter()).build();
+        return stepBuilderFactory.get("creditStep").<String, String> chunk(1)
+                .reader(multiResourceItemReader())
+                .processor(creditItemProcessor())
+                .writer(itemWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new MySkipListener())
+                .build();
     }
 
     @Bean
     public Step debitStep() {
-        return stepBuilderFactory.get("debitStep").<String, String> chunk(1).reader(multiResourceItemReader())
-                .processor(debitItemProcessor()).writer(itemWriter()).faultTolerant()
+        return stepBuilderFactory.get("debitStep").<String, String> chunk(1)
+                .reader(multiResourceItemReader())
+                .processor(debitItemProcessor())
+                .writer(itemWriter())
+                .faultTolerant()
                 .skipPolicy(new MySkipPolicy())
-                .listener(new MySkipListener()).build();
+                .listener(new MySkipListener())
+                .build();
     }
 
     @Bean
@@ -141,18 +130,25 @@ public class BatchConfig {
     @Bean
     public Step downloadFileStep() {
         return stepBuilderFactory.get("downloadFileStep")
-                .tasklet(downloadFileTasklet()).build();
+                .tasklet(downloadFileTasklet())
+                .build();
     }
 
-    // @Bean
+    @Bean
     public Job creditJob() {
-        return jobBuilderFactory.get("creditJob").start(creditStep()).build();
+        return jobBuilderFactory.get("creditJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadFileStep())
+                .next(creditStep())
+                .build();
     }
 
     @Bean
     public Job debitJob() {
-        return jobBuilderFactory.get("debitJob").incrementer(new RunIdIncrementer())
-                .start(downloadFileStep()).next(debitStep())
+        return jobBuilderFactory.get("debitJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadFileStep())
+                .next(debitStep())
                 .build();
     }
 
@@ -165,7 +161,7 @@ public class BatchConfig {
 
     @PreDestroy
     private void preDestroy() {
-        System.out.println("Called onApplicationEvent().");
+        LOGGER.info("Called onApplicationEvent().");
     }
 
 }

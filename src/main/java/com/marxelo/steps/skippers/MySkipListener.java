@@ -6,8 +6,6 @@ import org.springframework.batch.core.annotation.OnSkipInWrite;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.stereotype.Component;
 
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +45,7 @@ public class MySkipListener {
         if (throwable.getCause() != null) {
             errorMessage.append("Exception Cause: " + throwable.getCause() + "\n");
         }
-        errorMessage.append("MasterDebitTransaction: " + item.toString());
+        errorMessage.append("Item skipped in Writer: " + item.toString());
         LOGGER.warn("{}", errorMessage.toString());
     }
 
@@ -62,7 +60,7 @@ public class MySkipListener {
         if (throwable.getCause() != null) {
             errorMessage.append("Exception Cause: " + throwable.getCause() + "\n");
         }
-        errorMessage.append("MasterDebitTransaction: " + item.toString());
+        errorMessage.append("Item skipped im Process: " + item.toString());
         LOGGER.warn("{}", errorMessage.toString());
 
     }
