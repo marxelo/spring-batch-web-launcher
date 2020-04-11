@@ -62,6 +62,7 @@ public class MySkipListener {
         }
         errorMessage.append("Item skipped im Process: " + item.toString());
         LOGGER.warn("{}", errorMessage.toString());
+        System.out.println(errorMessage.toString());
 
     }
 

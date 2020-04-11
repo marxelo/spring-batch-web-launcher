@@ -63,6 +63,8 @@ public class BatchConfig {
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
+        System.out.println(".........FlatFileItemReader.......... ");
+
         return new FlatFileItemReaderBuilder<String>()
                 .name("itemReader")
                 .lineMapper(new PassThroughLineMapper())
@@ -71,6 +73,8 @@ public class BatchConfig {
 
     @Bean
     public ItemReader<String> multiResourceItemReader() {
+        System.out.println("........ItemReader............. ");
+
         final MultiResourceItemReader<String> reader = new MultiResourceItemReader<>();
         reader.setResources(resources);
         reader.setDelegate(itemReader());
@@ -79,6 +83,8 @@ public class BatchConfig {
 
     @Bean
     public CreditItemProcessor creditItemProcessor() {
+        System.out.println(".........CreditItemProcessor.............");
+
         CreditItemProcessor processor = new CreditItemProcessor();
         return processor;
     }
@@ -91,9 +97,10 @@ public class BatchConfig {
 
     @Bean
     public ItemWriter<String> itemWriter() {
+        System.out.println("I'm gonna write something ");
         return items -> {
             for (final String item : items) {
-                System.out.println("writing item = " + item);
+                System.out.println("writing item..: " + item);
             }
         };
     }

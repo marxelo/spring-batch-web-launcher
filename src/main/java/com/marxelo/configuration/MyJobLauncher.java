@@ -1,6 +1,5 @@
 package com.marxelo.configuration;
 
-import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -12,15 +11,14 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 @EnableScheduling
 @Component
-public class JobScheduler {
+public class MyJobLauncher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
 
     @Autowired
     private JobLauncher jobLauncher;
@@ -32,16 +30,12 @@ public class JobScheduler {
 
     String msg = null;
 
-    @Value("${spring.main.web_environment}")
-    private boolean webEnv;
+    public String run(String fileDate) {
 
-    public String run(String processingDate) {
-        System.out.println("webEnv: " + webEnv);
-
-        LOGGER.info("Processing date> " + processingDate);
+        LOGGER.info("File date............: " + fileDate);
         try {
             execution = jobLauncher.run(creditJob,
-                    new JobParametersBuilder().addString("processingDate", processingDate).toJobParameters());
+                    new JobParametersBuilder().addString("processingDate", fileDate).toJobParameters());
             LOGGER.info("Job Started");
             System.out.println("Execution status: " + execution.getStatus());
             msg = execution.getStatus().toString();
@@ -60,13 +54,6 @@ public class JobScheduler {
             }
         }
         return msg;
-    }
-
-    public void runBatchJob() throws JobExecutionAlreadyRunningException, JobRestartException,
-            JobInstanceAlreadyCompleteException, JobParametersInvalidException {
-        LOGGER.info("start runBatchJob");
-        jobLauncher.run(creditJob, new JobParametersBuilder().addDate("date", new Date()).toJobParameters());
-
     }
 
 }

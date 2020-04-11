@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class JobController {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobScheduler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
 
   @Autowired
-  JobScheduler JobScheduler;
+  MyJobLauncher myJobLauncher;
 
   @GetMapping("/startJob")
   public JobExecutionRequest jer(@RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
@@ -25,14 +25,16 @@ public class JobController {
       LOGGER.info(jobName);
       return new JobExecutionRequest(jobName, fileDate, "Invalid job name");
     }
+    LOGGER.info(jobName);
 
     if (!GenericValidator.isDate(fileDate, "yyyyMMdd", true)) {
       LOGGER.info(fileDate);
       return new JobExecutionRequest(jobName, fileDate,
           "Invalid date. Informe no formato /startJob?jobName=xxxx&?fileDate=YYYYMMdd");
     }
+    LOGGER.info(fileDate);
 
-    String jobStatus = JobScheduler.run(fileDate);
+    String jobStatus = myJobLauncher.run(fileDate);
     LOGGER.info(jobStatus);
     return new JobExecutionRequest(jobName, fileDate, jobStatus);
   }
@@ -40,6 +42,7 @@ public class JobController {
   @GetMapping({ "", "/", "/**", "index", "index.html" })
   // as by default Spring maps unknown urls to "/**"
   public String help() {
+    LOGGER.info("Informe no formato /startJob?jobName=xxxx&?fileDate=YYYYMMddxx");
     return "Informe no formato /startJob?jobName=xxxx&?fileDate=YYYYMMdd";
   }
 

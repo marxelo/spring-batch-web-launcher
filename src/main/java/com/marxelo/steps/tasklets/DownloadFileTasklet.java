@@ -13,7 +13,8 @@ public class DownloadFileTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext)
             throws Exception {
-        LOGGER.info("Utilizando a data de processamento = ");
+        LOGGER.info("Utilizando a data de processamento............: ");
+        System.out.println("Utilizando a data de processamento............: ");
         return RepeatStatus.FINISHED;
     }
 }
