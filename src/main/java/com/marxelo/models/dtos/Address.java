@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Address {
 
-    public static final String RECORD_TYPE = "A";
+    public static final String ADDRESS_LINE = "A";
 
     private String lineType;
     private String streetName;

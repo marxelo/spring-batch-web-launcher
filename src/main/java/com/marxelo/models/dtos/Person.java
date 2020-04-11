@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 public class Person {
 
-    public static final String RECORD_TYPE = "N";
+    public static final String PERSON_LINE = "N";
 
     private String lineType;
     private String firstName;
