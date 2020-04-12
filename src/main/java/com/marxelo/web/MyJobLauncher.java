@@ -5,11 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
@@ -26,34 +22,57 @@ public class MyJobLauncher {
     @Autowired
     private Job personJob;
 
+    @Autowired
+    private Job creditJob;
+
     private JobExecution execution;
 
-    String msg = null;
+    // String msg = null;
 
-    public String run(String fileDate) {
-
-        LOGGER.info("File date............: " + fileDate);
+    public ExecutionRequestResponse run(String jobName, String fileDate, String timeString) {
+        StringBuilder errorMessage = new StringBuilder();
+        String msg = null;
+        String jobStatus;
         try {
-            execution = jobLauncher.run(personJob,
-                    new JobParametersBuilder().addString("fileDate", fileDate).toJobParameters());
-            LOGGER.info("Job Started");
-            System.out.println("Execution status: " + execution.getStatus());
-            msg = execution.getStatus().toString();
-        } catch (JobExecutionAlreadyRunningException e) {
-            e.printStackTrace();
-        } catch (JobRestartException e) {
-            e.printStackTrace();
-        } catch (JobInstanceAlreadyCompleteException e) {
-            e.printStackTrace();
-        } catch (JobParametersInvalidException e) {
-            e.printStackTrace();
-        } finally {
-            if (msg == null) {
-                msg = "Job Error";
-
+            if (jobName.equals("personJob")) {
+                execution = jobLauncher.run(personJob,
+                        new JobParametersBuilder()
+                                .addString("fileDate", fileDate)
+                                .addString("timeString", timeString)
+                                .toJobParameters());
+            } else {
+                execution = jobLauncher.run(creditJob,
+                        new JobParametersBuilder()
+                                .addString("fileDate", fileDate)
+                                .addString("timeString", timeString)
+                                .toJobParameters());
             }
+            LOGGER.info("Job Started");
+            System.out.println("Execution status: " + execution.getExitStatus());
+            System.out.println("Execution status: " + execution.getStatus());
+            jobStatus = execution.getStatus().toString();
+        } catch (Exception e) {
+            // e.printStackTrace();
+            errorMessage.append("Erro ao executar job.\n");
+            if (e.getMessage() != null) {
+                errorMessage.append("Message: " + e.getMessage() + "\n");
+            }
+            if ((e.getLocalizedMessage() != null)
+                    && !(e.getMessage().toString().equals(e.getLocalizedMessage().toString()))) {
+                errorMessage.append("LocalizedMessage: " + e.getLocalizedMessage() + "\n");
+            }
+            if (e.getCause() != null) {
+                errorMessage.append("Cause: " + e.getCause() + "\n");
+            }
+            if (e.getClass() != null) {
+                errorMessage.append(e.getClass() + "\n");
+            }
+            msg = errorMessage.toString();
+            System.out.println(msg);
+            msg = msg.replace("\n", " ");
+            jobStatus = "FAILED";
         }
-        return msg;
+        return new ExecutionRequestResponse(jobStatus, msg);
     }
 
 }
