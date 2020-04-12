@@ -1,12 +1,21 @@
 package com.marxelo.configuration;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
 import javax.annotation.PreDestroy;
 
+import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.CreditItemProcessor;
 import com.marxelo.steps.DebitItemProcessor;
+import com.marxelo.steps.PersonItemProcessor;
+import com.marxelo.steps.PersonItemReader;
+import com.marxelo.steps.PersonItemWriter;
 import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
 import com.marxelo.steps.tasklets.DownloadFileTasklet;
+import com.marxelo.steps.tokenizers.PersonCompositeLineTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +30,16 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.MultiResourceItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.mapping.PassThroughFieldSetMapper;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
+import org.springframework.batch.item.file.transform.FieldSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -49,6 +62,9 @@ public class BatchConfig {
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
+    // @Autowired
+    // private Person person;
 
     // @Bean
     // public BatchConfigurer configurer(BatchProperties properties,
@@ -156,6 +172,82 @@ public class BatchConfig {
                 .incrementer(new RunIdIncrementer())
                 .start(downloadFileStep())
                 .next(debitStep())
+                .build();
+    }
+
+    //  <--------------------------- Person --------------------------------->
+    @Bean
+    public PersonCompositeLineTokenizer personTokenizers() {
+        PersonCompositeLineTokenizer tokenizers = new PersonCompositeLineTokenizer();
+        return tokenizers;
+    }
+
+    @Bean
+    public FlatFileItemReader<FieldSet> personFileItemReader() {
+        String formattedString = System.getenv("DATA_PROCESSAMENTO");
+        if (Objects.isNull(formattedString)) {
+            LocalDate localDate = LocalDate.now().minusDays(1L);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            formattedString = localDate.format(formatter);
+        } else {
+            LOGGER.info("Utilizando a data de processamento = " + formattedString);
+        }
+
+        FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
+        reader.setResource(new FileSystemResource(
+                "BASE2.MASTER.V1.DEB." + formattedString + ".S1.txt"));
+        reader.setLineMapper(new DefaultLineMapper() {
+            {
+                setLineTokenizer(personTokenizers());
+            }
+            {
+                setFieldSetMapper(new PassThroughFieldSetMapper());
+            }
+        });
+        reader.setBufferedReaderFactory(new MyBufferedReaderFactory());
+        return reader;
+    }
+
+    @Bean
+    public PersonItemReader personItemReader() {
+        PersonItemReader reader = new PersonItemReader();
+        reader.setFieldSetReader(personFileItemReader());
+        return reader;
+    }
+
+    public PersonItemProcessor personItemProcessor() {
+
+        LOGGER.info("------------------------Person Item Processor----------------------------");
+
+        PersonItemProcessor processor = new PersonItemProcessor();
+        return processor;
+    }
+
+    @Bean
+    public PersonItemWriter personWriter() {
+        PersonItemWriter writer = new PersonItemWriter();
+        return writer;
+    }
+
+    @Bean
+    public Step personStep() {
+        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
+                .reader(personItemReader())
+                .processor(personItemProcessor())
+                .writer(personWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new MySkipListener())
+                .stream(personFileItemReader())
+                .build();
+    }
+
+    @Bean
+    public Job personJob() {
+        return jobBuilderFactory.get("personJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadFileStep())
+                .next(personStep())
                 .build();
     }
 
