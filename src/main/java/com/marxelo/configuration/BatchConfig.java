@@ -12,6 +12,7 @@ import com.marxelo.steps.DebitItemProcessor;
 import com.marxelo.steps.PersonItemProcessor;
 import com.marxelo.steps.PersonItemReader;
 import com.marxelo.steps.PersonItemWriter;
+import com.marxelo.steps.personStepExecutionListener;
 import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
 import com.marxelo.steps.skippers.PersonSkipListener;
@@ -242,6 +243,7 @@ public class BatchConfig {
                 .skipPolicy(new MySkipPolicy())
                 .listener(new PersonSkipListener())
                 .stream(personFileItemReader())
+                .listener(new personStepExecutionListener())
                 .build();
     }
 
