@@ -1,4 +1,4 @@
-package com.example.batch;
+package com.marxelo.web;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class JobExecutionRequest {
+public class ExecutionRequestResponse {
 
-    private String jobName;
-    private String fileDate;
-    private final String jobStatus;
+    private String jobStatus;
+    private String message;
 }
