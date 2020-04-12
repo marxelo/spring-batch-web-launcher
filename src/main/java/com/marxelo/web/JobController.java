@@ -1,6 +1,6 @@
-package com.marxelo.configuration;
+package com.marxelo.web;
 
-import com.marxelo.models.JobExecutionRequest;
+import com.marxelo.web.JobExecutionRequest;
 
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
