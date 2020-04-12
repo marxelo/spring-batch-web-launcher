@@ -15,7 +15,7 @@ public class PersonItemProcessor implements ItemProcessor<Person, Person> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonItemProcessor.class);
 
-    static Resource[] resources = new Resource[] {new ClassPathResource("pessoas.txt") };
+    static Resource[] resources = new Resource[] { new ClassPathResource("pessoas.txt") };
 
     private StepExecution stepExecution;
 
@@ -26,7 +26,7 @@ public class PersonItemProcessor implements ItemProcessor<Person, Person> {
         final int resourceIndex = executionContext.getInt("MultiResourceItemReader.resourceIndex");
         LOGGER.info("PersonItemprocessor-processing item: " + person.toString() + " coming from resource = "
                 + resources[resourceIndex + 1]);
-                System.out.println("PersonItemprocessor-processing item: " + person.toString() + " coming from resource = "
+        System.out.println("PersonItemprocessor-processing item: " + person.toString() + " coming from resource = "
                 + resources[resourceIndex + 1]);
         return person;
     }
