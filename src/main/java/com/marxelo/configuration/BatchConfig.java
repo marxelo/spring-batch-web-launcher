@@ -8,7 +8,6 @@ import javax.annotation.PreDestroy;
 
 import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.CreditItemProcessor;
-import com.marxelo.steps.DebitItemProcessor;
 import com.marxelo.steps.PersonItemProcessor;
 import com.marxelo.steps.PersonItemReader;
 import com.marxelo.steps.PersonItemWriter;
