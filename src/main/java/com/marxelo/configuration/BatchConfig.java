@@ -58,7 +58,6 @@ public class BatchConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
 
     private static final String WILL_BE_INJECTED = null;
-    private String fileDate;
 
     @Autowired
     PlatformTransactionManager transactionManager;
@@ -85,8 +84,6 @@ public class BatchConfig {
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
-        System.out.println(".........FlatFileItemReader.......... ");
-
         return new FlatFileItemReaderBuilder<String>()
                 .name("itemReader")
                 .lineMapper(new PassThroughLineMapper())
@@ -95,8 +92,6 @@ public class BatchConfig {
 
     @Bean
     public ItemReader<String> multiResourceItemReader() {
-        System.out.println("........ItemReader............. ");
-
         final MultiResourceItemReader<String> reader = new MultiResourceItemReader<>();
         reader.setResources(resources);
         reader.setDelegate(itemReader());
@@ -105,7 +100,6 @@ public class BatchConfig {
 
     @Bean
     public CreditItemProcessor creditItemProcessor() {
-        System.out.println(".........CreditItemProcessor.............");
 
         CreditItemProcessor processor = new CreditItemProcessor();
         return processor;
@@ -119,7 +113,6 @@ public class BatchConfig {
 
     @Bean
     public ItemWriter<String> itemWriter() {
-        System.out.println("I'm gonna write something ");
         return items -> {
             for (final String item : items) {
                 System.out.println("writing item..: " + item);
@@ -190,8 +183,8 @@ public class BatchConfig {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['run.id']}") String runID) {
-        System.out.println("FileDate.HAHAHAHAHAH.........:" + runID);
+    public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['fileDate']}") String fileDate) {
+        System.out.println("FileDate in reader.....:" + fileDate);
 
         String formattedString = System.getenv("DATA_PROCESSAMENTO");
         if (Objects.isNull(formattedString)) {
@@ -221,18 +214,12 @@ public class BatchConfig {
     @Bean
     @StepScope
     public PersonItemReader personItemReader() {
-        LOGGER.info("----------------------- Person Item Reader ----------------------------");
-        // System.out.println("RudID..........:" + runID);
         PersonItemReader reader = new PersonItemReader();
         reader.setFieldSetReader(personFileItemReader(WILL_BE_INJECTED));
-        // fileDate = runID;
         return reader;
     }
 
     public PersonItemProcessor personItemProcessor() {
-
-        LOGGER.info("------------------------Person Item Processor----------------------------");
-
         PersonItemProcessor processor = new PersonItemProcessor();
         return processor;
     }
@@ -247,7 +234,6 @@ public class BatchConfig {
     public Step personStep() {
         return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
                 .reader(personItemReader())
-                // .reader(personItemReader(WILL_BE_INJECTED))
                 .processor(personItemProcessor())
                 .writer(personWriter())
                 .faultTolerant()

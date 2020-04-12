@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Configuration;
 public class DownloadFileTasklet implements Tasklet {
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadFileTasklet.class);
 
-    @Value("#{jobParameters['run.id']}")
-    private String runID;
+    @Value("#{jobParameters['fileDate']}")
+    private String fileDate;
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext)
             throws Exception {
-        LOGGER.info("RunID in tasklet............: " + runID);
-        System.out.println("Utilizando a data de processamento............: ");
+        LOGGER.info("File Date in tasklet............: " + fileDate);
+        System.out.println("File Date in tasklet............: " + fileDate);
         return RepeatStatus.FINISHED;
     }
 }

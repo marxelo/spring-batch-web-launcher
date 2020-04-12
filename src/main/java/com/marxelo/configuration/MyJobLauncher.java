@@ -35,7 +35,7 @@ public class MyJobLauncher {
         LOGGER.info("File date............: " + fileDate);
         try {
             execution = jobLauncher.run(personJob,
-                    new JobParametersBuilder().addString("processingDate", fileDate).toJobParameters());
+                    new JobParametersBuilder().addString("fileDate", fileDate).toJobParameters());
             LOGGER.info("Job Started");
             System.out.println("Execution status: " + execution.getStatus());
             msg = execution.getStatus().toString();
