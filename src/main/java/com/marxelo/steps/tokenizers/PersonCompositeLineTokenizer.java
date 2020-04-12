@@ -28,7 +28,7 @@ public class PersonCompositeLineTokenizer extends PatternMatchingCompositeLineTo
     public LineTokenizer defaulTokenizer() {
         FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
         String[] names = new String[] { "lineType", "allColumns" };
-        Range[] ranges = new Range[] { new Range(1, 2), new Range(5, 30) };
+        Range[] ranges = new Range[] { new Range(1, 1), new Range(2, 30) };
         tokenizer.setNames(names);
         tokenizer.setColumns(ranges);
         tokenizer.setStrict(false);

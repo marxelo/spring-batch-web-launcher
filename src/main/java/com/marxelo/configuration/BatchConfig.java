@@ -14,6 +14,7 @@ import com.marxelo.steps.PersonItemReader;
 import com.marxelo.steps.PersonItemWriter;
 import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
+import com.marxelo.steps.skippers.PersonSkipListener;
 import com.marxelo.steps.tasklets.DownloadFileTasklet;
 import com.marxelo.steps.tokenizers.PersonCompositeLineTokenizer;
 
@@ -50,7 +51,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableScheduling
 public class BatchConfig {
 
-    static Resource[] resources = new Resource[] { new ClassPathResource("data1.csv"), new ClassPathResource("data2.csv") };
+    static Resource[] resources = new Resource[] { new ClassPathResource("pessoas.txt") };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
 
@@ -157,7 +158,7 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
+    // @Bean
     public Job creditJob() {
         return jobBuilderFactory.get("creditJob")
                 .incrementer(new RunIdIncrementer())
@@ -166,7 +167,7 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
+    // @Bean
     public Job debitJob() {
         return jobBuilderFactory.get("debitJob")
                 .incrementer(new RunIdIncrementer())
@@ -194,8 +195,9 @@ public class BatchConfig {
         }
 
         FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
-        reader.setResource(new FileSystemResource(
-                "BASE2.MASTER.V1.DEB." + formattedString + ".S1.txt"));
+        // reader.setResource(new ClassPathResource(
+        //         "resources/pessoas.txt"));
+        reader.setResource(new FileSystemResource("src/main/resources/pessoas.txt"));
         reader.setLineMapper(new DefaultLineMapper() {
             {
                 setLineTokenizer(personTokenizers());
@@ -210,6 +212,7 @@ public class BatchConfig {
 
     @Bean
     public PersonItemReader personItemReader() {
+        LOGGER.info("----------------------- Person Item Reader ----------------------------");
         PersonItemReader reader = new PersonItemReader();
         reader.setFieldSetReader(personFileItemReader());
         return reader;
@@ -237,7 +240,7 @@ public class BatchConfig {
                 .writer(personWriter())
                 .faultTolerant()
                 .skipPolicy(new MySkipPolicy())
-                .listener(new MySkipListener())
+                .listener(new PersonSkipListener())
                 .stream(personFileItemReader())
                 .build();
     }

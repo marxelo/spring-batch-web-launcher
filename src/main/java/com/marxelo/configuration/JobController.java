@@ -21,7 +21,7 @@ public class JobController {
   @GetMapping("/startJob")
   public JobExecutionRequest jer(@RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate) {
-    if ((!jobName.equals("creditJob")) && !jobName.equals("debitJob")) {
+    if ((!jobName.equals("creditJob")) && !jobName.equals("debitJob") && !jobName.equals("personJob")) {
       LOGGER.info(jobName);
       return new JobExecutionRequest(jobName, fileDate, "Invalid job name");
     }

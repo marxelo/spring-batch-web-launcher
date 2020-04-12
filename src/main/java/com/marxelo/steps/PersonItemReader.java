@@ -37,7 +37,7 @@ public class PersonItemReader implements ItemReader<Person> {
             process(fieldSetReader.read());
         }
 
-        LOGGER.debug("Mapped: " + person);
+        LOGGER.info("Mapped: " + person);
 
         Person result = person;
         person = null;
@@ -50,43 +50,43 @@ public class PersonItemReader implements ItemReader<Person> {
 
         // finish processing if we hit the end of file
         if (fieldSet == null) {
-            LOGGER.debug("FINISHED");
+            LOGGER.info("FINISHED");
             person = personCache;
             personCache = null;
             recordFinished = true;
             return;
         }
 
-        String lineId = fieldSet.readString(0) + fieldSet.readString(1);
+        String lineId = fieldSet.readString(0);
 
         if (Person.PERSON_LINE.equals(lineId)) {
             if (personCache == null) {
-                LOGGER.debug("STARTING NEW RECORD");
-                LOGGER.debug("MAPPING person");
+                LOGGER.info("STARTING NEW RECORD");
+                LOGGER.info("MAPPING person");
                 personCache = personMapper().mapFieldSet(fieldSet);
             } else if (personCache != null) {
-                LOGGER.debug("FINISHED NEW RECORD");
-                LOGGER.debug("MAPPING person");
+                LOGGER.info("FINISHED NEW RECORD");
+                LOGGER.info("MAPPING person");
                 person = personCache;
 
-                LOGGER.debug("STARTING NEW RECORD");
-                LOGGER.debug("MAPPING person");
+                LOGGER.info("STARTING NEW RECORD");
+                LOGGER.info("MAPPING person");
                 personCache = null;
                 personCache = personMapper().mapFieldSet(fieldSet);
 
                 recordFinished = true;
             }
         } else if (Address.ADDRESS_LINE.equals(lineId)) {
-            LOGGER.debug("MAPPING ADDRESS");
+            LOGGER.info("MAPPING ADDRESS");
             personCache.setAddress(addressMapper().mapFieldSet(fieldSet));
 
         } else if (Profession.PROFESSION_LINE.equals(lineId)) {
-            LOGGER.debug("MAPPING PROFESSION");
+            LOGGER.info("MAPPING PROFESSION");
             personCache.setProfession(professionMapper().mapFieldSet(fieldSet));
 
         } else {
 
-            LOGGER.debug("Could not map LINE_ID=" + lineId);
+            LOGGER.info("Could not map LINE_ID=" + lineId);
 
         }
     }

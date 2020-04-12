@@ -24,7 +24,7 @@ public class MyJobLauncher {
     private JobLauncher jobLauncher;
 
     @Autowired
-    private Job creditJob;
+    private Job personJob;
 
     private JobExecution execution;
 
@@ -34,7 +34,7 @@ public class MyJobLauncher {
 
         LOGGER.info("File date............: " + fileDate);
         try {
-            execution = jobLauncher.run(creditJob,
+            execution = jobLauncher.run(personJob,
                     new JobParametersBuilder().addString("processingDate", fileDate).toJobParameters());
             LOGGER.info("Job Started");
             System.out.println("Execution status: " + execution.getStatus());
