@@ -53,7 +53,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableScheduling
 public class BatchConfig {
 
-    static Resource[] resources = new Resource[] { new ClassPathResource("pessoas.txt") };
+    static Resource[] resourceData = new Resource[] { new ClassPathResource("data1.csv") };
+    static Resource[] resourcePessoas = new Resource[] { new ClassPathResource("pessoas.txt") };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
 
@@ -93,7 +94,7 @@ public class BatchConfig {
     @Bean
     public ItemReader<String> multiResourceItemReader() {
         final MultiResourceItemReader<String> reader = new MultiResourceItemReader<>();
-        reader.setResources(resources);
+        reader.setResources(resourceData);
         reader.setDelegate(itemReader());
         return reader;
     }
@@ -156,7 +157,7 @@ public class BatchConfig {
                 .build();
     }
 
-    // @Bean
+    @Bean
     public Job creditJob() {
         return jobBuilderFactory.get("creditJob")
                 .incrementer(new RunIdIncrementer())

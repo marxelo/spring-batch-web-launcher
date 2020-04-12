@@ -19,7 +19,7 @@ public class PersonItemWriter implements ItemWriter<Person> {
         if (!items.isEmpty()) {
             for (final Person person : items) {
                 System.out.println("writing item..: " + person);
-                LOGGER.info("writing item..: " + person);
+                LOGGER.debug("writing item..: " + person);
             }
         }
 
