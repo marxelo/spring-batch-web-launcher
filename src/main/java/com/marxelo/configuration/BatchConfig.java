@@ -107,12 +107,6 @@ public class BatchConfig {
     }
 
     @Bean
-    public DebitItemProcessor debitItemProcessor() {
-        DebitItemProcessor processor = new DebitItemProcessor();
-        return processor;
-    }
-
-    @Bean
     public ItemWriter<String> itemWriter() {
         return items -> {
             for (final String item : items) {
@@ -126,18 +120,6 @@ public class BatchConfig {
         return stepBuilderFactory.get("creditStep").<String, String> chunk(1)
                 .reader(multiResourceItemReader())
                 .processor(creditItemProcessor())
-                .writer(itemWriter())
-                .faultTolerant()
-                .skipPolicy(new MySkipPolicy())
-                .listener(new MySkipListener())
-                .build();
-    }
-
-    @Bean
-    public Step debitStep() {
-        return stepBuilderFactory.get("debitStep").<String, String> chunk(1)
-                .reader(multiResourceItemReader())
-                .processor(debitItemProcessor())
                 .writer(itemWriter())
                 .faultTolerant()
                 .skipPolicy(new MySkipPolicy())
@@ -166,15 +148,6 @@ public class BatchConfig {
                 .build();
     }
 
-    // @Bean
-    public Job debitJob() {
-        return jobBuilderFactory.get("debitJob")
-                .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep())
-                .next(debitStep())
-                .build();
-    }
-
     //  <--------------------------- Person --------------------------------->
     @Bean
     public PersonCompositeLineTokenizer personTokenizers() {
@@ -187,7 +160,7 @@ public class BatchConfig {
     public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['fileDate']}") String fileDate) {
         System.out.println("FileDate in reader.....:" + fileDate);
 
-        String formattedString = System.getenv("DATA_PROCESSAMENTO");
+        String formattedString = fileDate;
         if (Objects.isNull(formattedString)) {
             LocalDate localDate = LocalDate.now().minusDays(1L);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -199,7 +172,7 @@ public class BatchConfig {
         FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
         // reader.setResource(new ClassPathResource(
         //         "resources/pessoas.txt"));
-        reader.setResource(new FileSystemResource("src/main/resources/pessoas.txt"));
+        reader.setResource(new FileSystemResource("src/main/resources/pessoas-" + formattedString + ".txt"));
         reader.setLineMapper(new DefaultLineMapper() {
             {
                 setLineTokenizer(personTokenizers());
