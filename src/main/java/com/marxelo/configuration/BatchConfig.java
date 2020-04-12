@@ -26,6 +26,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -55,6 +56,9 @@ public class BatchConfig {
     static Resource[] resources = new Resource[] { new ClassPathResource("pessoas.txt") };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
+
+    private static final String WILL_BE_INJECTED = null;
+    private String fileDate;
 
     @Autowired
     PlatformTransactionManager transactionManager;
@@ -185,7 +189,10 @@ public class BatchConfig {
     }
 
     @Bean
-    public FlatFileItemReader<FieldSet> personFileItemReader() {
+    @StepScope
+    public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['run.id']}") String runID) {
+        System.out.println("FileDate.HAHAHAHAHAH.........:" + runID);
+
         String formattedString = System.getenv("DATA_PROCESSAMENTO");
         if (Objects.isNull(formattedString)) {
             LocalDate localDate = LocalDate.now().minusDays(1L);
@@ -212,10 +219,13 @@ public class BatchConfig {
     }
 
     @Bean
+    @StepScope
     public PersonItemReader personItemReader() {
         LOGGER.info("----------------------- Person Item Reader ----------------------------");
+        // System.out.println("RudID..........:" + runID);
         PersonItemReader reader = new PersonItemReader();
-        reader.setFieldSetReader(personFileItemReader());
+        reader.setFieldSetReader(personFileItemReader(WILL_BE_INJECTED));
+        // fileDate = runID;
         return reader;
     }
 
@@ -237,12 +247,13 @@ public class BatchConfig {
     public Step personStep() {
         return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
                 .reader(personItemReader())
+                // .reader(personItemReader(WILL_BE_INJECTED))
                 .processor(personItemProcessor())
                 .writer(personWriter())
                 .faultTolerant()
                 .skipPolicy(new MySkipPolicy())
                 .listener(new PersonSkipListener())
-                .stream(personFileItemReader())
+                .stream(personFileItemReader(WILL_BE_INJECTED))
                 .listener(new personStepExecutionListener())
                 .build();
     }
