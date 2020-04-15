@@ -16,6 +16,14 @@ public class PersonItemProcessor implements ItemProcessor<Person, Person> {
     public Person process(final Person person) throws Exception {
         LOGGER.debug("Processing item: " + person.toString());
         System.out.println("Processing item: " + person.toString());
+        // Aguardar o último envio de métrica
+        try {
+            Thread.sleep(7500L);
+            LOGGER.info("awake");
+        } catch (InterruptedException e) {
+
+            e.printStackTrace();
+        }
         return person;
     }
 }
