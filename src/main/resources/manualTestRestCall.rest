@@ -24,3 +24,11 @@ GET http://localhost:8080/a/index.html HTTP/1.1
 @fileDate = 20200411
 @time = 223902
 GET http://localhost:8080/startJob?jobName={{jobName}}&fileDate={{fileDate}}&time={{time}}
+
+### Test personJob - 
+
+GET http://localhost:8080/startJob
+?jobName=personJob
+&fileDate=20200412
+&time=001522
+# HTTP/1.1
