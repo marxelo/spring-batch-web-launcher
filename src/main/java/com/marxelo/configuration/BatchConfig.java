@@ -172,14 +172,10 @@ public class BatchConfig {
         // reader.setResource(new ClassPathResource(
         //         "resources/pessoas.txt"));
         reader.setResource(new FileSystemResource("src/main/resources/pessoas-" + formattedString + ".txt"));
-        reader.setLineMapper(new DefaultLineMapper() {
-            {
-                setLineTokenizer(personTokenizers());
-            }
-            {
-                setFieldSetMapper(new PassThroughFieldSetMapper());
-            }
-        });
+        final DefaultLineMapper<FieldSet> defaultLineMapper = new DefaultLineMapper<>();
+        defaultLineMapper.setLineTokenizer(personTokenizers());
+        defaultLineMapper.setFieldSetMapper(new PassThroughFieldSetMapper());
+        reader.setLineMapper(defaultLineMapper);
         reader.setBufferedReaderFactory(new MyBufferedReaderFactory());
         return reader;
     }
