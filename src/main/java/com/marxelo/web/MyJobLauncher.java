@@ -5,19 +5,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.stereotype.Component;
 
 @EnableScheduling
-@Component
+@Configuration
 public class MyJobLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
 
     @Autowired
-    private JobLauncher jobLauncher;
+    private SimpleJobLauncher jobLauncher;
 
     @Autowired
     private Job personJob;
@@ -27,9 +28,14 @@ public class MyJobLauncher {
 
     private JobExecution execution;
 
-    // String msg = null;
+    @Autowired
+    public MyJobLauncher(@Qualifier("asyncJobLauncher") SimpleJobLauncher jobLauncher, Job personJob) {
+        super();
+        this.jobLauncher = jobLauncher;
+        this.personJob = personJob;
+    }
 
-    public ExecutionRequestResponse run(String jobName, String fileDate, String timeString) {
+    public ExecutionRequestResponse run(String jobName, String fileDate, String time) {
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
         String jobStatus;
@@ -38,18 +44,16 @@ public class MyJobLauncher {
                 execution = jobLauncher.run(personJob,
                         new JobParametersBuilder()
                                 .addString("fileDate", fileDate)
-                                .addString("timeString", timeString)
+                                .addString("time", time)
                                 .toJobParameters());
             } else {
                 execution = jobLauncher.run(creditJob,
                         new JobParametersBuilder()
                                 .addString("fileDate", fileDate)
-                                .addString("timeString", timeString)
+                                .addString("time", time)
                                 .toJobParameters());
             }
             LOGGER.info("Job Started");
-            System.out.println("Execution status: " + execution.getExitStatus());
-            System.out.println("Execution status: " + execution.getStatus());
             jobStatus = execution.getStatus().toString();
         } catch (Exception e) {
             // e.printStackTrace();
@@ -65,7 +69,7 @@ public class MyJobLauncher {
                 errorMessage.append("Cause: " + e.getCause() + "\n");
             }
             if (e.getClass() != null) {
-                errorMessage.append(e.getClass() + "\n");
+                errorMessage.append("Exception " + e.getClass() + "\n");
             }
             msg = errorMessage.toString();
             System.out.println(msg);

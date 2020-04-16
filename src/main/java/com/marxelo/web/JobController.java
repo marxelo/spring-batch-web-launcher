@@ -19,20 +19,20 @@ public class JobController {
   @GetMapping("/startJob")
   public JobExecutionRequest jer(@RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
-      @RequestParam(value = "time", defaultValue = "000000") String timeString) {
+      @RequestParam(value = "time", defaultValue = "000000") String time) {
     if ((!jobName.equals("creditJob")) && !jobName.equals("debitJob") && !jobName.equals("personJob")) {
       LOGGER.info(jobName);
-      return new JobExecutionRequest("Invalid job name. Informe no formato /startJob?jobName=xxxx&?fileDate=YYYYMMdd");
+      return new JobExecutionRequest("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
     LOGGER.info(jobName);
 
     if (!GenericValidator.isDate(fileDate, "yyyyMMdd", true)) {
       LOGGER.info(fileDate);
-      return new JobExecutionRequest("Invalid date. Informe no formato /startJob?jobName=xxxx&?fileDate=YYYYMMdd");
+      return new JobExecutionRequest("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
     LOGGER.info(fileDate);
 
-    ExecutionRequestResponse ere = myJobLauncher.run(jobName, fileDate, timeString);
+    ExecutionRequestResponse ere = myJobLauncher.run(jobName, fileDate, time);
     LOGGER.info(ere.getJobStatus());
     return new JobExecutionRequest(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }
@@ -41,7 +41,7 @@ public class JobController {
   // as by default Spring maps unknown urls to "/**"
   public JobExecutionRequest notFound404() {
 
-    return new JobExecutionRequest("Bad request. Informe no formato /startJob?jobName=xxxx&?fileDate=YYYYMMdd");
+    return new JobExecutionRequest("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
   }
 
 }
