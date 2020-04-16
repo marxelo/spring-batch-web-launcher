@@ -1,5 +1,11 @@
 package com.marxelo.web;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +47,18 @@ public class JobController {
   @PostMapping("/start-job")
   public String saveProjectSubmission(@ModelAttribute ExecutionRequest executionRequest) {
 
-    System.out.println(
-        executionRequest.getJobName() + " 88888888888 " + executionRequest.getFileDate() + " ************ "
-            + executionRequest.getSequencial());
+    String d = executionRequest.getFileDate();
+    String fileDate = d.substring(0, 4) + d.substring(5, 7) + d.substring(8, 10);
+    String jobName = executionRequest.getJobName();
+    String time = executionRequest.getSequencial() + "";
+
+    // System.out.println(
+    //     executionRequest.getJobName() + " ...... data: " + executionRequest.getFileDate() + "date:" + date + " ************ "
+    //         + executionRequest.getSequencial());
+
+    ExecutionRequestResponse ere = myJobLauncher.run(jobName, fileDate, time);
+    LOGGER.info(ere.getJobStatus());
+    JobExecutionRequest jer = new JobExecutionRequest(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
 
     return "result";
   }
