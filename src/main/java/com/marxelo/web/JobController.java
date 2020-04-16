@@ -4,17 +4,49 @@ import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class JobController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
 
   @Autowired
   MyJobLauncher myJobLauncher;
+
+  @GetMapping("/create-project")
+  public String createProjectForm(Model model) {
+
+    model.addAttribute("project", new Project());
+    return "create-project";
+  }
+
+  @GetMapping("/request-job")
+  public String requestExecutionForm(Model model) {
+
+    model.addAttribute("executionRequest", new ExecutionRequest());
+    return "request-job";
+  }
+
+  @GetMapping(path = "/upload")
+  public String helloWorld() {
+    return "upload";
+  }
+
+  @PostMapping("/start-job")
+  public String saveProjectSubmission(@ModelAttribute ExecutionRequest executionRequest) {
+
+    System.out.println(
+        executionRequest.getJobName() + " 88888888888 " + executionRequest.getFileDate() + " ************ "
+            + executionRequest.getSequencial());
+
+    return "result";
+  }
 
   @GetMapping("/startJob")
   public JobExecutionRequest jer(@RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,

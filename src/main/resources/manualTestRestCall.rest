@@ -32,3 +32,6 @@ GET http://localhost:8080/startJob
 &fileDate=20200412
 &time=001522
 # HTTP/1.1
+
+### Teste upload.html
+http://localhost:8080/upload

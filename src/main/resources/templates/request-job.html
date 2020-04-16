@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Project</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <h2>Reprocessar Cálculo de Receita de Intercâmbio Mastercard</h2>
+                <form th:action="@{/start-job}" th:object="${executionRequest}" method="post">
+                    <ul th:if="${#fields.hasErrors('*')}">
+                    <li th:each="error : ${#fields.errors('*')}" th:text="${error}">error</li>
+                </ul>
+                <div class="form-row">
+                    <div class="col-md-6 form-group">
+                        <label>Sequencial*</label>
+                        <input type="number" class="form-control" th:field="*{sequencial}">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Data do arquivo</label>
+                        <input type="date" class="form-control" th:field="*{fileDate}">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Job Name</label>
+                        <select class="form-control" th:field="*{jobName}">
+                            <option value="">Selecione...</option>
+                            <option value="creditJob">creditJob</option>
+                            <option value="personJob">personJob</option>
+                            <option value="debitJob">debitJob</option>
+                        </select>
+                    </div>               
+                </div>
+              
+                <button type="submit" class="btn btn-primary btn-block mt-3">Solicitar execução</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
