@@ -27,6 +27,8 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -43,7 +45,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -233,5 +237,27 @@ public class BatchConfig {
     private void preDestroy() {
         LOGGER.info("Called onApplicationEvent().");
     }
+    @Autowired
+    private JobRepository jobRepository;
 
+    @Bean
+    public TaskExecutor threadPoolTaskExecutor() {
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(12);
+        executor.setCorePoolSize(8);
+        executor.setQueueCapacity(15);
+
+        return executor;
+    }
+
+    @Bean
+    public SimpleJobLauncher asyncJobLauncher() throws Exception {
+        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+
+        jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.setTaskExecutor(threadPoolTaskExecutor());
+        return jobLauncher;
+    }
+    
 }
