@@ -223,6 +223,7 @@ public class BatchConfig {
                 .incrementer(new RunIdIncrementer())
                 .start(downloadFileStep())
                 .next(personStep())
+                .listener(new JobResultListener())
                 .build();
     }
 
@@ -237,6 +238,7 @@ public class BatchConfig {
     private void preDestroy() {
         LOGGER.info("Called onApplicationEvent().");
     }
+
     @Autowired
     private JobRepository jobRepository;
 
@@ -259,5 +261,5 @@ public class BatchConfig {
         jobLauncher.setTaskExecutor(threadPoolTaskExecutor());
         return jobLauncher;
     }
-    
+
 }

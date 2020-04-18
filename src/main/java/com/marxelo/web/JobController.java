@@ -19,13 +19,6 @@ public class JobController {
   @Autowired
   MyJobLauncher myJobLauncher;
 
-  @GetMapping("/create-project")
-  public String createProjectForm(Model model) {
-
-    model.addAttribute("project", new Project());
-    return "create-project";
-  }
-
   @GetMapping("/request-job")
   public String requestExecutionForm(Model model) {
 
@@ -33,19 +26,14 @@ public class JobController {
     return "request-job";
   }
 
-  @GetMapping(path = "/upload")
-  public String helloWorld() {
-    return "upload";
-  }
-
   @PostMapping("/start-job")
   public String saveProjectSubmission(@ModelAttribute ExecutionRequest executionRequest) {
 
     String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
     String jobName = executionRequest.getJobName();
-    String time = executionRequest.getSequencial() + "";
+    String sequencial = executionRequest.getSequencial() + "";
 
-    ExecutionRequestResponse ere = myJobLauncher.run(jobName, fileDate, time);
+    ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
     executionRequest.setJobStatus(ere.getJobStatus());
     executionRequest.setMessage(ere.getMessage());
@@ -54,9 +42,11 @@ public class JobController {
   }
 
   @GetMapping("/startJob")
-  public JobExecutionRequest jer(@RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
+  public JobExecutionRequest jer(
+      @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
-      @RequestParam(value = "time", defaultValue = "000000") String time) {
+      @RequestParam(value = "time", defaultValue = "000000") String sequencial) {
+
     if ((!jobName.equals("creditJob")) && !jobName.equals("debitJob") && !jobName.equals("personJob")) {
       LOGGER.info(jobName);
       return new JobExecutionRequest("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
@@ -69,7 +59,7 @@ public class JobController {
     }
     LOGGER.info(fileDate);
 
-    ExecutionRequestResponse ere = myJobLauncher.run(jobName, fileDate, time);
+    ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
     return new JobExecutionRequest(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }

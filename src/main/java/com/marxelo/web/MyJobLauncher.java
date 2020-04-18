@@ -35,10 +35,11 @@ public class MyJobLauncher {
         this.personJob = personJob;
     }
 
-    public ExecutionRequestResponse run(String jobName, String fileDate, String sequencial) {
+    public ExecutionRequest run(String jobName, String fileDate, String sequencial) {
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
         String jobStatus;
+
         try {
             if (jobName.equals("personJob")) {
                 execution = jobLauncher.run(personJob,
@@ -74,9 +75,11 @@ public class MyJobLauncher {
             msg = errorMessage.toString();
             System.out.println(msg);
             msg = msg.replace("\n", " ");
+            String str = execution.getStatus().toString();
+            System.out.println("exc est................................: " + str);
             jobStatus = "FAILED";
         }
-        return new ExecutionRequestResponse(jobStatus, msg);
+        return new ExecutionRequest(jobStatus, msg);
     }
 
 }

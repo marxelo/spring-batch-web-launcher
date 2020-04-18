@@ -30,4 +30,15 @@ public class ExecutionRequest {
         this.sequencial = sequencial;
     }
 
+    /**
+     * @param jobStatus
+     * @param message
+     */
+    public ExecutionRequest(String jobStatus, String message) {
+        this.jobStatus = jobStatus;
+        this.message = message;
+    }
+
+    
+
 }
