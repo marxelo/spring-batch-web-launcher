@@ -41,18 +41,14 @@ public class JobController {
   @PostMapping("/start-job")
   public String saveProjectSubmission(@ModelAttribute ExecutionRequest executionRequest) {
 
-    String d = executionRequest.getFileDate();
-    String fileDate = d.substring(0, 4) + d.substring(5, 7) + d.substring(8, 10);
+    String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
     String jobName = executionRequest.getJobName();
     String time = executionRequest.getSequencial() + "";
 
-    // System.out.println(
-    //     executionRequest.getJobName() + " ...... data: " + executionRequest.getFileDate() + "date:" + date + " ************ "
-    //         + executionRequest.getSequencial());
-
     ExecutionRequestResponse ere = myJobLauncher.run(jobName, fileDate, time);
     LOGGER.info(ere.getJobStatus());
-    JobExecutionRequest jer = new JobExecutionRequest(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
+    executionRequest.setJobStatus(ere.getJobStatus());
+    executionRequest.setMessage(ere.getMessage());
 
     return "result";
   }

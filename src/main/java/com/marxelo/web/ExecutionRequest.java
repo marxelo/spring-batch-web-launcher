@@ -12,10 +12,22 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @ToString
 public class ExecutionRequest {
-    
-    private int sequencial;
+
     private String jobName;
     private String fileDate;
-    
+    private int sequencial;
+    private String jobStatus;
+    private String message;
+
+    /**
+     * @param jobName
+     * @param fileDate
+     * @param sequencial
+     */
+    public ExecutionRequest(String jobName, String fileDate, int sequencial) {
+        this.jobName = jobName;
+        this.fileDate = fileDate;
+        this.sequencial = sequencial;
+    }
 
 }

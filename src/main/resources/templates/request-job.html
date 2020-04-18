@@ -3,46 +3,51 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Create New Project</title>
+    <title>Cálculo de Receita de Intercâmbio Mastercard</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 
 <body>
-
     <div class="container my-3">
         <div class="row">
-            <div class="col-md-8 mx-auto">
-                <h2>Reprocessar Cálculo de Receita de Intercâmbio Mastercard</h2>
+            <div class="col-md-6 mx-auto">
+                <h4 style="text-align: center;">Submissão de Jobs (Mastercard)</h4>
                 <form th:action="@{/start-job}" th:object="${executionRequest}" method="post">
                     <ul th:if="${#fields.hasErrors('*')}">
-                    <li th:each="error : ${#fields.errors('*')}" th:text="${error}">error</li>
-                </ul>
-                <div class="form-row">
-                    <div class="col-md-6 form-group">
-                        <label>Sequencial*</label>
-                        <input type="number" class="form-control" th:field="*{sequencial}">
+                        <li th:each="error : ${#fields.errors('*')}" th:text="${error}">error</li>
+                    </ul>
+                    <div class="col-md-6 form-group mx-auto">
+                        <label>Nome do Job</label>
+                        <select class="form-control" th:field="*{jobName}">
+                                <option value="">Selecione...</option>
+                                <option value="creditJob">creditJob</option>
+                                <option value="personJob">personJob</option>
+                                <option value="debitJob">debitJob</option>
+                            </select>
                     </div>
-                    <div class="col-md-6 form-group">
+                    <div class="col-md-6 form-group mx-auto">
                         <label>Data do arquivo</label>
                         <input type="date" class="form-control" th:field="*{fileDate}">
                     </div>
-                    <div class="col-md-6 form-group">
-                        <label>Job Name</label>
-                        <select class="form-control" th:field="*{jobName}">
-                            <option value="">Selecione...</option>
-                            <option value="creditJob">creditJob</option>
-                            <option value="personJob">personJob</option>
-                            <option value="debitJob">debitJob</option>
-                        </select>
-                    </div>               
-                </div>
-              
-                <button type="submit" class="btn btn-primary btn-block mt-3">Solicitar execução</button>
-            </form>
-        </div>
-    </div>
-</div>
+                    <div class="col-md-6 form-group mx-auto">
+                        <label>Sequencial*</label>
+                        <input type="number" class="form-control" th:field="*{sequencial}">
 
+                    </div>
+                    <div class="col-md-6 form-group mx-auto">
+                        <button type="submit" class="btn btn-primary
+                                btn-block mt-3">Solicitar execução</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- </div> -->
+        <div class="container my-3">
+            <div th:align="center">*Altere apenas se reprocessamento</div>
+        </div>
 </body>
+
 </html>
