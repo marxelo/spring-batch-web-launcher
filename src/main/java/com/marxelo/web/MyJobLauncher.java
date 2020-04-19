@@ -6,6 +6,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -77,7 +79,11 @@ public class MyJobLauncher {
             msg = msg.replace("\n", " ");
             String str = execution.getStatus().toString();
             System.out.println("exc est................................: " + str);
-            jobStatus = "FAILED";
+            if (e instanceof JobInstanceAlreadyCompleteException || e instanceof JobExecutionAlreadyRunningException) {
+                jobStatus = execution.getStatus().toString();
+            } else {
+                jobStatus = "FAILED";
+            }
         }
         return new ExecutionRequest(jobStatus, msg);
     }

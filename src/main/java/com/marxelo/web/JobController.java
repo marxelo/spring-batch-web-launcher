@@ -19,45 +19,58 @@ public class JobController {
   @Autowired
   MyJobLauncher myJobLauncher;
 
-  @GetMapping("/request-job")
+  @GetMapping("/submit")
   public String requestExecutionForm(Model model) {
 
     model.addAttribute("executionRequest", new ExecutionRequest());
-    return "request-job";
+    return "submit";
   }
 
-  @PostMapping("/start-job")
-  public String saveProjectSubmission(@ModelAttribute ExecutionRequest executionRequest) {
+  @PostMapping("/submit")
+  public String processJobExecutionRequest(@ModelAttribute ExecutionRequest executionRequest) {
 
     String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
     String jobName = executionRequest.getJobName();
     String sequencial = executionRequest.getSequencial() + "";
+    executionRequest.setMessage(null);
+
+    if (!JobNameIsValid(jobName)) {
+      executionRequest.setMessage("JobName não informado");
+      // return "response";
+      return "submit";
+    }
+
+    if (!FileDateIsValid(fileDate)) {
+      executionRequest.setMessage("Data do arquivo não informada");
+      return "submit";
+    }
 
     ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
     executionRequest.setJobStatus(ere.getJobStatus());
     executionRequest.setMessage(ere.getMessage());
 
-    return "result";
+    if (ere.getMessage() == null) {
+      executionRequest.setMessage("Aguarde conclusão do job!");
+      return "submit";
+    }
+
+    return "response";
   }
 
   @GetMapping("/startJob")
   public JobExecutionRequest jer(
       @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
-      @RequestParam(value = "time", defaultValue = "000000") String sequencial) {
+      @RequestParam(value = "sequencial", defaultValue = "0") String sequencial) {
 
-    if ((!jobName.equals("creditJob")) && !jobName.equals("debitJob") && !jobName.equals("personJob")) {
-      LOGGER.info(jobName);
+    if (!JobNameIsValid(jobName)) {
       return new JobExecutionRequest("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
-    LOGGER.info(jobName);
 
-    if (!GenericValidator.isDate(fileDate, "yyyyMMdd", true)) {
-      LOGGER.info(fileDate);
+    if (!FileDateIsValid(fileDate)) {
       return new JobExecutionRequest("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
-    LOGGER.info(fileDate);
 
     ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
@@ -69,6 +82,14 @@ public class JobController {
   public JobExecutionRequest notFound404() {
 
     return new JobExecutionRequest("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+  }
+
+  public Boolean JobNameIsValid(String jobName) {
+    return (jobName.equals("creditJob") || jobName.equals("personJob"));
+  }
+
+  public Boolean FileDateIsValid(String fileDate) {
+    return (GenericValidator.isDate(fileDate, "yyyyMMdd", true));
   }
 
 }

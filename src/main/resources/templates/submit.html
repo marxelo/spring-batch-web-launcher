@@ -12,8 +12,8 @@
     <div class="container my-3">
         <div class="row">
             <div class="col-md-6 mx-auto">
-                <h4 style="text-align: center;">Submissão de Jobs (Mastercard)</h4>
-                <form th:action="@{/start-job}" th:object="${executionRequest}" method="post">
+                <h4 style="text-align: center;">Submissão de Jobs</h4>
+                <form th:action="@{/submit}" th:object="${executionRequest}" method="post">
                     <ul th:if="${#fields.hasErrors('*')}">
                         <li th:each="error : ${#fields.errors('*')}" th:text="${error}">error</li>
                     </ul>
@@ -39,13 +39,17 @@
                         <button type="submit" class="btn btn-primary
                                 btn-block mt-3">Solicitar execução</button>
                     </div>
+                    <th:block th:if="${executionRequest.message != null}">
+                        <p th:align="center"><strong><span th:text="${executionRequest.message}"></span></strong>
+                        </p>
+                    </th:block>
                 </form>
             </div>
 
         </div>
 
         <!-- </div> -->
-        <div class="container my-3">
+        <div class="container my-4">
             <div th:align="center">*Altere apenas se reprocessamento</div>
         </div>
 </body>
