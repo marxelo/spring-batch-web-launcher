@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -26,7 +28,8 @@ public class JobController {
     return "submit";
   }
 
-  @PostMapping("/submit")
+  @RequestMapping(value = "/submit", method = RequestMethod.POST, params = "action=execute")
+  // @PostMapping("/submit")
   public String processJobExecutionRequest(@ModelAttribute ExecutionRequest executionRequest) {
 
     String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
@@ -36,7 +39,6 @@ public class JobController {
 
     if (!JobNameIsValid(jobName)) {
       executionRequest.setMessage("JobName não informado");
-      // return "response";
       return "submit";
     }
 
@@ -46,6 +48,38 @@ public class JobController {
     }
 
     ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
+    LOGGER.info(ere.getJobStatus());
+    executionRequest.setJobStatus(ere.getJobStatus());
+    executionRequest.setMessage(ere.getMessage());
+
+    if (ere.getMessage() == null) {
+      executionRequest.setMessage("Aguarde conclusão do job!");
+      return "submit";
+    }
+
+    return "response";
+  }
+
+  @RequestMapping(value = "/submit", method = RequestMethod.POST, params = "action=detail")
+  // @PostMapping("/jobDetail")
+  public String jobDetail(@ModelAttribute ExecutionRequest executionRequest) {
+
+    String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
+    String jobName = executionRequest.getJobName();
+    String sequencial = executionRequest.getSequencial() + "";
+    executionRequest.setMessage(null);
+
+    if (!JobNameIsValid(jobName)) {
+      executionRequest.setMessage("JobName não informado");
+      return "submit";
+    }
+
+    if (!FileDateIsValid(fileDate)) {
+      executionRequest.setMessage("Data do arquivo não informada");
+      return "submit";
+    }
+
+    ExecutionRequest ere = myJobLauncher.getJobDetail(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
     executionRequest.setJobStatus(ere.getJobStatus());
     executionRequest.setMessage(ere.getMessage());

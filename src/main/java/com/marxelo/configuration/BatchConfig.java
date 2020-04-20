@@ -26,6 +26,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
@@ -241,6 +242,10 @@ public class BatchConfig {
 
     @Autowired
     private JobRepository jobRepository;
+
+
+    @Autowired
+    private JobExplorer jobExplorer;
 
     @Bean
     public TaskExecutor threadPoolTaskExecutor() {
