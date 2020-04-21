@@ -23,14 +23,14 @@ public class JobController {
   @Autowired
   JobDetail jobDetail;
 
-  @GetMapping("/submit")
+  @GetMapping("/request")
   public String requestExecutionForm(Model model) {
 
     model.addAttribute("executionRequest", new ExecutionRequest());
-    return "submit";
+    return "request";
   }
 
-  @RequestMapping(value = "/submit", method = RequestMethod.POST, params = "action=execute")
+  @RequestMapping(value = "/request", method = RequestMethod.POST, params = "action=execute")
   // @PostMapping("/submit")
   public String processJobExecutionRequest(@ModelAttribute ExecutionRequest executionRequest) {
 
@@ -41,12 +41,12 @@ public class JobController {
 
     if (!JobNameIsValid(jobName)) {
       executionRequest.setMessage("JobName não informado");
-      return "submit";
+      return "request";
     }
 
     if (!FileDateIsValid(fileDate)) {
       executionRequest.setMessage("Data do arquivo não informada");
-      return "submit";
+      return "request";
     }
 
     ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
@@ -56,13 +56,13 @@ public class JobController {
 
     if (ere.getMessage() == null) {
       executionRequest.setMessage("Aguarde conclusão do job!");
-      return "submit";
+      return "request";
     }
 
     return "response";
   }
 
-  @RequestMapping(value = "/submit", method = RequestMethod.POST, params = "action=detail")
+  @RequestMapping(value = "/request", method = RequestMethod.POST, params = "action=detail")
   // @PostMapping("/jobDetail")
   public String jobDetail(@ModelAttribute ExecutionRequest executionRequest) {
 
@@ -73,12 +73,12 @@ public class JobController {
 
     if (!JobNameIsValid(jobName)) {
       executionRequest.setMessage("JobName não informado");
-      return "submit";
+      return "request";
     }
 
     if (!FileDateIsValid(fileDate)) {
       executionRequest.setMessage("Data do arquivo não informada");
-      return "submit";
+      return "request";
     }
 
     ExecutionRequest ere = jobDetail.getJobDetail(jobName, fileDate, sequencial);
