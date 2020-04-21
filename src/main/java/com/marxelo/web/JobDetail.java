@@ -55,14 +55,13 @@ public class JobDetail {
                             er.setStepExecutionDetail(stepExecution.toString());
                             break instanceForLoop;
                         }
-
                     }
                 }
             }
         }
 
         if (er.getJobStatus() == null) {
-            er.setMessage("No information found for job " + jobName + " with parameters " + jobParameters.toString());
+            er.setMessage("No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
             LOGGER.info(er.toString());
         }
 

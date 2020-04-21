@@ -3,17 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Result</title>
-
+    <title>Detalhamento da Execução do Job</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 
 <body>
-
     <div class="container my-3">
         <div class="row">
             <div class="col-md-8 mx-auto">
-                <h2>Resumo</h2>
+                <h2>Detalhamento da Execução do Job</h2>
                 <div class="my-3">
                     <p><strong>Job Name:</strong> <span th:text="${executionRequest.jobName}"></span></p>
                     <p><strong>Data do Arquivo:</strong> <span th:text="${executionRequest.fileDate}"></span></p>
@@ -35,7 +33,6 @@
             </div>
         </div>
     </div>
-
 </body>
 
 </html>
