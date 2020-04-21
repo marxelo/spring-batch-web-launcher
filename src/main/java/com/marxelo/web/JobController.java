@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +19,9 @@ public class JobController {
 
   @Autowired
   MyJobLauncher myJobLauncher;
+
+  @Autowired
+  JobDetail jobDetail;
 
   @GetMapping("/submit")
   public String requestExecutionForm(Model model) {
@@ -79,7 +81,7 @@ public class JobController {
       return "submit";
     }
 
-    ExecutionRequest ere = myJobLauncher.getJobDetail(jobName, fileDate, sequencial);
+    ExecutionRequest ere = jobDetail.getJobDetail(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
     executionRequest.setJobStatus(ere.getJobStatus());
     executionRequest.setMessage(ere.getMessage());
