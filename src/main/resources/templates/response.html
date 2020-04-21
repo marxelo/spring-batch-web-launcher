@@ -19,6 +19,14 @@
                     <p><strong>Data do Arquivo:</strong> <span th:text="${executionRequest.fileDate}"></span></p>
                     <p><strong>sequencial:</strong> <span th:text="${executionRequest.sequencial}"></span></p>
                     <p><strong>Status do Job:</strong> <span th:text="${executionRequest.jobStatus}"></span></p>
+                    <th:block th:if="${executionRequest.jobExecutionDetail != null}">
+                        <p><strong>Detalhe do Job:</strong> <span
+                                th:text="${executionRequest.jobExecutionDetail}"></span></p>
+                    </th:block>
+                    <th:block th:if="${executionRequest.StepExecutionDetail != null}">
+                        <p><strong>Detalhe Step Principal:</strong> <span
+                                th:text="${executionRequest.StepExecutionDetail}"></span></p>
+                    </th:block>
                     <th:block th:if="${executionRequest.message != null}">
                         <p><strong>Mensagem:</strong> <span th:text="${executionRequest.message}"></span></p>
                     </th:block>

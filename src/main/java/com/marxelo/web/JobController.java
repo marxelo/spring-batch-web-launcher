@@ -83,11 +83,8 @@ public class JobController {
     LOGGER.info(ere.getJobStatus());
     executionRequest.setJobStatus(ere.getJobStatus());
     executionRequest.setMessage(ere.getMessage());
-
-    if (ere.getMessage() == null) {
-      executionRequest.setMessage("Aguarde conclusão do job!");
-      return "submit";
-    }
+    executionRequest.setJobExecutionDetail(ere.getJobExecutionDetail());
+    executionRequest.setStepExecutionDetail(ere.getStepExecutionDetail());
 
     return "response";
   }

@@ -17,6 +17,8 @@ public class ExecutionRequest {
     private String fileDate;
     private int sequencial;
     private String jobStatus;
+    private String jobExecutionDetail;
+    private String StepExecutionDetail;
     private String message;
 
     /**

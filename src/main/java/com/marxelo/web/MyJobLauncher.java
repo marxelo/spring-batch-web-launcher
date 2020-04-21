@@ -1,5 +1,6 @@
 package com.marxelo.web;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -51,22 +53,7 @@ public class MyJobLauncher {
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
         String jobStatus;
-        var activeExecutions = jobExplorer.findRunningJobExecutions(jobName);
-        List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 3);
 
-        for (JobInstance jobInstance : jobInstances) {
-            List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
-            for (JobExecution jobExecution : jobExecutions) {
-                // Make sure the execution id is the current id
-                // Then get the list of stepExecutions from jobExecution
-                // jobExecution.getJobParameters()
-                System.out.println("Exec to string+++++++: " + jobExecution.toString());
-                System.out.println("Execution Status.......: " +
-                        jobExecution.getExitStatus());
-
-            }
-        }
-        System.out.println(activeExecutions + "<<<<<<<<<<<<<<<<<<");
         try {
             if (jobName.equals("personJob")) {
                 execution = jobLauncher.run(personJob,
@@ -115,29 +102,41 @@ public class MyJobLauncher {
 
     public ExecutionRequest getJobDetail(String jobName, String fileDate, String sequencial) {
 
-        StringBuilder errorMessage = new StringBuilder();
-        String msg = null;
-        String jobStatus;
-        var activeExecutions = jobExplorer.findRunningJobExecutions(jobName);
+        ExecutionRequest er = new ExecutionRequest(jobName, fileDate, Integer.parseInt(sequencial));
+
         JobParametersBuilder jpb = new JobParametersBuilder();
         jpb.addString("fileDate", fileDate);
         jpb.addString("sequencial", sequencial);
         JobParameters jobParameters = jpb.toJobParameters();
+        int JOB_INSTANCE_COUNT = 30;
 
-        List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 3);
+        List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, JOB_INSTANCE_COUNT);
 
         for (JobInstance jobInstance : jobInstances) {
             List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
             for (JobExecution jobExecution : jobExecutions) {
-                // Make sure the execution id is the current id
-                // Then get the list of stepExecutions from jobExecution
-                // jobExecution.getJobParameters()
                 if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())) {
+                    er.setJobStatus(jobExecution.getStatus().toString());
+                    er.setJobExecutionDetail(jobExecution.toString());
+                    if (jobExecution.getStatus().toString().equals("FAILED")) {
+                        er.setMessage(jobExecution.getExitStatus().getExitDescription());
+                    }
                     System.out.println("ÉÉÉÉÉÉÉÉÉÉÉÉ IGUAL");
-                    return new ExecutionRequest(jobExecution.getStatus().toString(), "ffddf");
+                    Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+                    for (StepExecution stepExecution : stepExecutions) {
+                        if ((stepExecution.getStepName().equals("personStep"))
+                                || (stepExecution.getStepName().equals("creditStep"))) {
+                            System.out.println("main step found %%%%%%%%%%%%%%%%%%%%%%%%%%");
+                            er.setStepExecutionDetail(stepExecution.toString());
+                            break;
+                        }
+
+                    }
+                    // return new ExecutionRequest(jobExecution.getStatus().toString(), "ffddf");
                 } else {
                     System.out.println(jobExecution.getJobParameters() + "<---->" + jobParameters);
                 }
+                jobExecution.getStepExecutions();
                 System.out.println("Exec to string+++++++: " + jobExecution.toString());
                 System.out.println("Execution Status.......: " +
                         jobExecution.getExitStatus());
@@ -145,7 +144,7 @@ public class MyJobLauncher {
             }
         }
 
-        return new ExecutionRequest("NOT FOUND", "NOT FOUNDX");
+        return er;
     }
 
 }
