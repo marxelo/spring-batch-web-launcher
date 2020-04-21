@@ -72,25 +72,22 @@ public class MyJobLauncher {
             jobStatus = execution.getStatus().toString();
         } catch (Exception e) {
             // e.printStackTrace();
-            errorMessage.append("Erro ao executar job.\n");
+            errorMessage.append("Erro ao executar job. ");
             if (e.getMessage() != null) {
-                errorMessage.append("Message: " + e.getMessage() + "\n");
+                errorMessage.append("Message: " + e.getMessage() + " ");
             }
             if ((e.getLocalizedMessage() != null)
                     && !(e.getMessage().toString().equals(e.getLocalizedMessage().toString()))) {
-                errorMessage.append("LocalizedMessage: " + e.getLocalizedMessage() + "\n");
+                errorMessage.append("LocalizedMessage: " + e.getLocalizedMessage() + " ");
             }
             if (e.getCause() != null) {
-                errorMessage.append("Cause: " + e.getCause() + "\n");
+                errorMessage.append("Cause: " + e.getCause() + " ");
             }
             if (e.getClass() != null) {
-                errorMessage.append("Exception " + e.getClass() + "\n");
+                errorMessage.append("Exception " + e.getClass() + " ");
             }
             msg = errorMessage.toString();
-            System.out.println(msg);
-            msg = msg.replace("\n", " ");
-            String str = execution.getStatus().toString();
-            System.out.println("exc est................................: " + str);
+
             if (e instanceof JobInstanceAlreadyCompleteException || e instanceof JobExecutionAlreadyRunningException) {
                 jobStatus = execution.getStatus().toString();
             } else {
@@ -112,36 +109,36 @@ public class MyJobLauncher {
 
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, JOB_INSTANCE_COUNT);
 
-        for (JobInstance jobInstance : jobInstances) {
+        instanceForLoop: for (JobInstance jobInstance : jobInstances) {
+
             List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
+
             for (JobExecution jobExecution : jobExecutions) {
+
                 if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())) {
                     er.setJobStatus(jobExecution.getStatus().toString());
                     er.setJobExecutionDetail(jobExecution.toString());
                     if (jobExecution.getStatus().toString().equals("FAILED")) {
                         er.setMessage(jobExecution.getExitStatus().getExitDescription());
                     }
-                    System.out.println("ÉÉÉÉÉÉÉÉÉÉÉÉ IGUAL");
+
                     Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
                     for (StepExecution stepExecution : stepExecutions) {
+
                         if ((stepExecution.getStepName().equals("personStep"))
                                 || (stepExecution.getStepName().equals("creditStep"))) {
-                            System.out.println("main step found %%%%%%%%%%%%%%%%%%%%%%%%%%");
+
                             er.setStepExecutionDetail(stepExecution.toString());
-                            break;
+                            break instanceForLoop;
                         }
 
                     }
-                    // return new ExecutionRequest(jobExecution.getStatus().toString(), "ffddf");
-                } else {
-                    System.out.println(jobExecution.getJobParameters() + "<---->" + jobParameters);
                 }
-                jobExecution.getStepExecutions();
-                System.out.println("Exec to string+++++++: " + jobExecution.toString());
-                System.out.println("Execution Status.......: " +
-                        jobExecution.getExitStatus());
-
             }
+        }
+
+        if (er.getJobStatus() == null) {
+            er.setMessage("No information found for job " + jobName + " with parameters " + jobParameters.toString());
         }
 
         return er;

@@ -243,9 +243,8 @@ public class BatchConfig {
     @Autowired
     private JobRepository jobRepository;
 
-
-    @Autowired
-    private JobExplorer jobExplorer;
+    // @Autowired
+    // private JobExplorer jobExplorer;
 
     @Bean
     public TaskExecutor threadPoolTaskExecutor() {
