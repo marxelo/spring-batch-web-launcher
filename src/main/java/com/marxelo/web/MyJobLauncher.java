@@ -6,6 +6,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -35,48 +37,52 @@ public class MyJobLauncher {
         this.personJob = personJob;
     }
 
-    public ExecutionRequestResponse run(String jobName, String fileDate, String time) {
+    public CustomJobExecution run(String jobName, String fileDate, String sequencial) {
+
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
         String jobStatus;
+
         try {
             if (jobName.equals("personJob")) {
                 execution = jobLauncher.run(personJob,
                         new JobParametersBuilder()
                                 .addString("fileDate", fileDate)
-                                .addString("time", time)
+                                .addString("sequencial", sequencial)
                                 .toJobParameters());
             } else {
                 execution = jobLauncher.run(creditJob,
                         new JobParametersBuilder()
                                 .addString("fileDate", fileDate)
-                                .addString("time", time)
+                                .addString("sequencial", sequencial)
                                 .toJobParameters());
             }
             LOGGER.info("Job Started");
             jobStatus = execution.getStatus().toString();
         } catch (Exception e) {
-            // e.printStackTrace();
-            errorMessage.append("Erro ao executar job.\n");
+            errorMessage.append("Erro ao executar job. ");
             if (e.getMessage() != null) {
-                errorMessage.append("Message: " + e.getMessage() + "\n");
+                errorMessage.append("Message: " + e.getMessage() + " ");
             }
             if ((e.getLocalizedMessage() != null)
                     && !(e.getMessage().toString().equals(e.getLocalizedMessage().toString()))) {
-                errorMessage.append("LocalizedMessage: " + e.getLocalizedMessage() + "\n");
+                errorMessage.append("LocalizedMessage: " + e.getLocalizedMessage() + " ");
             }
             if (e.getCause() != null) {
-                errorMessage.append("Cause: " + e.getCause() + "\n");
+                errorMessage.append("Cause: " + e.getCause() + " ");
             }
             if (e.getClass() != null) {
-                errorMessage.append("Exception " + e.getClass() + "\n");
+                errorMessage.append("Exception " + e.getClass() + " ");
             }
             msg = errorMessage.toString();
-            System.out.println(msg);
-            msg = msg.replace("\n", " ");
-            jobStatus = "FAILED";
+
+            if (e instanceof JobInstanceAlreadyCompleteException || e instanceof JobExecutionAlreadyRunningException) {
+                jobStatus = execution.getStatus().toString();
+            } else {
+                jobStatus = "FAILED";
+            }
         }
-        return new ExecutionRequestResponse(jobStatus, msg);
+        return new CustomJobExecution(jobStatus, msg);
     }
 
 }

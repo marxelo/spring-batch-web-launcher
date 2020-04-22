@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cálculo de Receita de Intercâmbio Mastercard</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <h4 style="text-align: center;">Submissão de Jobs</h4>
+                <form action="#" th:action="@{/job-manager}" th:object="${customJobExecution}" method="post">
+                    <div class="col-md-6 form-group mx-auto">
+                        <label>Nome do Job</label>
+                        <select class="form-control" th:field="*{jobName}">
+                            <option value="">Selecione...</option>
+                            <option value="creditJob">creditJob</option>
+                            <option value="personJob">personJob</option>
+                            <option value="debitJob">debitJob</option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('jobName')}" class="help-block" th:errors="*{jobName}" th:style="${'color: red;'}"></span>
+                    </div>
+                    <div class="col-md-6 form-group mx-auto">
+                        <label>Data do arquivo</label>
+                        <input type="date" class="form-control" th:field="*{fileDate}">
+                        <span th:if="${#fields.hasErrors('fileDate')}" class="help-block" th:errors="*{fileDate}" th:style="${'color: red;'}"></span>
+                    </div>
+                    <div class="col-md-6 form-group mx-auto">
+                        <label>Sequencial*</label>
+                        <input type="number" class="form-control" th:field="*{sequencial}">
+                        <span th:if="${#fields.hasErrors('sequencial')}" class="help-block" th:errors="*{sequencial}" th:style="${'color: red;'}"></span>
+                        <p th:align="center">*Altere apenas se reprocessamento</p>                        
+                    </div>
+                    <div class="col-md-6 form-group mx-auto">
+                        <button type="submit" class="btn btn-primary
+                                btn-block mt-3" name="action" value="execute">Submeter Job</button>
+                    </div> <div class="col-md-6 form-group mx-auto">
+                        <button type="submit" class="btn btn-primary
+                              btn-block mt-3" name="action" value="detail">Detalhar Resultado</button>
+                    </div>
+                    <th:block th:if="${customJobExecution.message != null}">
+                        <p th:align="center" th:style="${'color: red;'}"><strong><span th:text="${customJobExecution.message}"></span></strong>
+                        </p>
+                    </th:block>
+                </form>
+            </div>
+        </div>
+</body>
+
+</html>
