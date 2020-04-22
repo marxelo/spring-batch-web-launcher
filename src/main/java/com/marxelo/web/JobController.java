@@ -100,29 +100,29 @@ public class JobController {
   }
 
   @GetMapping("/startJob")
-  public JobExecutionRequest jer(
+  public CustomJobExecution jer(
       @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
       @RequestParam(value = "sequencial", defaultValue = "0") String sequencial) {
 
     if (!JobNameIsValid(jobName)) {
-      return new JobExecutionRequest("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+      return new CustomJobExecution("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
 
     if (!FileDateIsValid(fileDate)) {
-      return new JobExecutionRequest("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+      return new CustomJobExecution("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
 
     CustomJobExecution ere = myJobLauncher.run(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
-    return new JobExecutionRequest(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
+    return new CustomJobExecution(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }
 
   @GetMapping({ "", "/", "/**", "index", "index.html" })
   // as by default Spring maps unknown urls to "/**"
   public String notFound404() {
     return "redirect:job-manager";
-    // return new JobExecutionRequest("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    // return new CustomJobExecution("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
   }
 
   public Boolean JobNameIsValid(String jobName) {
