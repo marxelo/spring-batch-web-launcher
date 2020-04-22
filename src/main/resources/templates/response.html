@@ -13,9 +13,9 @@
             <div class="col-md-8 mx-auto">
                 <h2>Detalhamento da Execução do Job</h2>
                 <div class="my-3">
-                    <p><strong>Job Name:</strong> <span th:text="${customJobExecution.jobName}"></span></p>
+                    <p><strong>JobName:</strong> <span th:text="${customJobExecution.jobName}"></span></p>
                     <p><strong>Data do Arquivo:</strong> <span th:text="${customJobExecution.fileDate}"></span></p>
-                    <p><strong>sequencial:</strong> <span th:text="${customJobExecution.sequencial}"></span></p>
+                    <p><strong>Identificador:</strong> <span th:text="${customJobExecution.identifier}"></span></p>
                     <p><strong>Status do Job:</strong> <span th:text="${customJobExecution.jobStatus}"></span></p>
                     <th:block th:if="${customJobExecution.jobExecutionDetail != null}">
                         <p><strong>Detalhe do Job:</strong> <span

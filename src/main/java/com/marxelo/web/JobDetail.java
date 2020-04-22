@@ -21,13 +21,13 @@ public class JobDetail {
     @Autowired
     private JobExplorer jobExplorer;
 
-    public CustomJobExecution getJobDetail(String jobName, String fileDate, String sequencial) {
+    public CustomJobExecution getJobDetail(String jobName, String fileDate, String identifier) {
 
-        CustomJobExecution er = new CustomJobExecution(jobName, fileDate, Integer.parseInt(sequencial));
+        CustomJobExecution cje = new CustomJobExecution(jobName, fileDate, Integer.parseInt(identifier));
 
         JobParametersBuilder jpb = new JobParametersBuilder();
         jpb.addString("fileDate", fileDate);
-        jpb.addString("sequencial", sequencial);
+        jpb.addString("identifier", identifier);
         JobParameters jobParameters = jpb.toJobParameters();
         int JOB_INSTANCE_COUNT = 30;
 
@@ -40,10 +40,10 @@ public class JobDetail {
             for (JobExecution jobExecution : jobExecutions) {
 
                 if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())) {
-                    er.setJobStatus(jobExecution.getStatus().toString());
-                    er.setJobExecutionDetail(jobExecution.toString());
+                    cje.setJobStatus(jobExecution.getStatus().toString());
+                    cje.setJobExecutionDetail(jobExecution.toString());
                     if (jobExecution.getStatus().toString().equals("FAILED")) {
-                        er.setMessage(jobExecution.getExitStatus().getExitDescription());
+                        cje.setMessage(jobExecution.getExitStatus().getExitDescription());
                     }
 
                     Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
@@ -52,7 +52,7 @@ public class JobDetail {
                         if ((stepExecution.getStepName().equals("personStep"))
                                 || (stepExecution.getStepName().equals("creditStep"))) {
 
-                            er.setStepExecutionDetail(stepExecution.toString());
+                            cje.setStepExecutionDetail(stepExecution.toString());
                             break instanceForLoop;
                         }
                     }
@@ -60,11 +60,11 @@ public class JobDetail {
             }
         }
 
-        if (er.getJobStatus() == null) {
-            er.setMessage("No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
-            LOGGER.info(er.toString());
+        if (cje.getJobStatus() == null) {
+            cje.setMessage("No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
+            LOGGER.info(cje.toString());
         }
 
-        return er;
+        return cje;
     }
 }

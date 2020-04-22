@@ -30,14 +30,14 @@
                         <span th:if="${#fields.hasErrors('fileDate')}" class="help-block" th:errors="*{fileDate}" th:style="${'color: red;'}"></span>
                     </div>
                     <div class="col-md-6 form-group mx-auto">
-                        <label>Sequencial*</label>
-                        <input type="number" class="form-control" th:field="*{sequencial}">
-                        <span th:if="${#fields.hasErrors('sequencial')}" class="help-block" th:errors="*{sequencial}" th:style="${'color: red;'}"></span>
+                        <label>Identificador*</label>
+                        <input type="number" class="form-control" th:field="*{identifier}">
+                        <span th:if="${#fields.hasErrors('identifier')}" class="help-block" th:errors="*{identifier}" th:style="${'color: red;'}"></span>
                         <p th:align="center">*Altere apenas se reprocessamento</p>                        
                     </div>
                     <div class="col-md-6 form-group mx-auto">
                         <button type="submit" class="btn btn-primary
-                                btn-block mt-3" name="action" value="execute">Submeter Job</button>
+                                btn-block mt-3" name="action" value="submit">Submeter Job</button>
                     </div> <div class="col-md-6 form-group mx-auto">
                         <button type="submit" class="btn btn-primary
                               btn-block mt-3" name="action" value="detail">Detalhar Resultado</button>

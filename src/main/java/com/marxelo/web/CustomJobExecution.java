@@ -26,10 +26,13 @@ public class CustomJobExecution {
     @Size(min = 10, max = 10, message = "Selecione uma data")
     private String fileDate;
 
-    @NotNull(message = "Informe um sequencial")
+    /**
+     * identifier - just a distinguisher to make possible to re-execute a COMPLETED job with the same fileDate
+     */
+    @NotNull(message = "Informe um Identificador")
     @Min(0)
     @Max(99)
-    private int sequencial;
+    private int identifier;
 
     private String jobStatus;
     private String jobExecutionDetail;
@@ -39,12 +42,12 @@ public class CustomJobExecution {
     /**
      * @param jobName
      * @param fileDate
-     * @param sequencial
+     * @param identifier
      */
-    public CustomJobExecution(String jobName, String fileDate, int sequencial) {
+    public CustomJobExecution(String jobName, String fileDate, int identifier) {
         this.jobName = jobName;
         this.fileDate = fileDate;
-        this.sequencial = sequencial;
+        this.identifier = identifier;
     }
 
     /**
