@@ -26,41 +26,41 @@ public class JobController {
   JobDetail jobDetail;
 
   @GetMapping("/job-manager")
-  public String requestExecutionForm(Model model) {
+  public String formSubmission(Model model) {
 
-    model.addAttribute("executionRequest", new ExecutionRequest());
+    model.addAttribute("customJobExecution", new CustomJobExecution());
     return "request";
   }
 
   @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=execute")
-  public String submitJob(@Valid ExecutionRequest executionRequest, BindingResult bindingResult, Model mode) {
+  public String submitJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
 
-    String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
-    String jobName = executionRequest.getJobName();
-    String sequencial = executionRequest.getSequencial() + "";
-    executionRequest.setMessage(null);
+    String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
+    String jobName = customJobExecution.getJobName();
+    String sequencial = customJobExecution.getSequencial() + "";
+    customJobExecution.setMessage(null);
 
     if (bindingResult.hasErrors()) {
       return "request";
     }
 
     if (!JobNameIsValid(jobName)) {
-      executionRequest.setMessage("JobName não informado");
+      customJobExecution.setMessage("JobName não informado");
       return "request";
     }
 
     if (!FileDateIsValid(fileDate)) {
-      executionRequest.setMessage("Data do arquivo não informada");
+      customJobExecution.setMessage("Data do arquivo não informada");
       return "request";
     }
 
-    ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
-    LOGGER.info(ere.getJobStatus());
-    executionRequest.setJobStatus(ere.getJobStatus());
-    executionRequest.setMessage(ere.getMessage());
+    CustomJobExecution cje = myJobLauncher.run(jobName, fileDate, sequencial);
+    LOGGER.info(cje.getJobStatus());
+    customJobExecution.setJobStatus(cje.getJobStatus());
+    customJobExecution.setMessage(cje.getMessage());
 
-    if (ere.getMessage() == null) {
-      executionRequest.setMessage("Aguarde conclusão do job!");
+    if (cje.getMessage() == null) {
+      customJobExecution.setMessage("Aguarde conclusão do job!");
       return "request";
     }
 
@@ -68,33 +68,33 @@ public class JobController {
   }
 
   @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=detail")
-  public String detailJob(@Valid ExecutionRequest executionRequest, BindingResult bindingResult, Model mode) {
+  public String detailJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
 
-    String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
-    String jobName = executionRequest.getJobName();
-    String sequencial = executionRequest.getSequencial() + "";
-    executionRequest.setMessage(null);
+    String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
+    String jobName = customJobExecution.getJobName();
+    String sequencial = customJobExecution.getSequencial() + "";
+    customJobExecution.setMessage(null);
 
     if (bindingResult.hasErrors()) {
       return "request";
     }
 
     if (!JobNameIsValid(jobName)) {
-      executionRequest.setMessage("JobName não informado");
+      customJobExecution.setMessage("JobName não informado");
       return "request";
     }
 
     if (!FileDateIsValid(fileDate)) {
-      executionRequest.setMessage("Data do arquivo não informada");
+      customJobExecution.setMessage("Data do arquivo não informada");
       return "request";
     }
 
-    ExecutionRequest ere = jobDetail.getJobDetail(jobName, fileDate, sequencial);
-    LOGGER.info(ere.getJobStatus());
-    executionRequest.setJobStatus(ere.getJobStatus());
-    executionRequest.setMessage(ere.getMessage());
-    executionRequest.setJobExecutionDetail(ere.getJobExecutionDetail());
-    executionRequest.setStepExecutionDetail(ere.getStepExecutionDetail());
+    CustomJobExecution cje = jobDetail.getJobDetail(jobName, fileDate, sequencial);
+    LOGGER.info(cje.getJobStatus());
+    customJobExecution.setJobStatus(cje.getJobStatus());
+    customJobExecution.setMessage(cje.getMessage());
+    customJobExecution.setJobExecutionDetail(cje.getJobExecutionDetail());
+    customJobExecution.setStepExecutionDetail(cje.getStepExecutionDetail());
 
     return "response";
   }
@@ -113,7 +113,7 @@ public class JobController {
       return new JobExecutionRequest("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
 
-    ExecutionRequest ere = myJobLauncher.run(jobName, fileDate, sequencial);
+    CustomJobExecution ere = myJobLauncher.run(jobName, fileDate, sequencial);
     LOGGER.info(ere.getJobStatus());
     return new JobExecutionRequest(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }

@@ -37,7 +37,7 @@ public class MyJobLauncher {
         this.personJob = personJob;
     }
 
-    public ExecutionRequest run(String jobName, String fileDate, String sequencial) {
+    public CustomJobExecution run(String jobName, String fileDate, String sequencial) {
 
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
@@ -60,7 +60,6 @@ public class MyJobLauncher {
             LOGGER.info("Job Started");
             jobStatus = execution.getStatus().toString();
         } catch (Exception e) {
-            // e.printStackTrace();
             errorMessage.append("Erro ao executar job. ");
             if (e.getMessage() != null) {
                 errorMessage.append("Message: " + e.getMessage() + " ");
@@ -83,7 +82,7 @@ public class MyJobLauncher {
                 jobStatus = "FAILED";
             }
         }
-        return new ExecutionRequest(jobStatus, msg);
+        return new CustomJobExecution(jobStatus, msg);
     }
 
 }

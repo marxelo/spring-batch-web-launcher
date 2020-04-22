@@ -21,9 +21,9 @@ public class JobDetail {
     @Autowired
     private JobExplorer jobExplorer;
 
-    public ExecutionRequest getJobDetail(String jobName, String fileDate, String sequencial) {
+    public CustomJobExecution getJobDetail(String jobName, String fileDate, String sequencial) {
 
-        ExecutionRequest er = new ExecutionRequest(jobName, fileDate, Integer.parseInt(sequencial));
+        CustomJobExecution er = new CustomJobExecution(jobName, fileDate, Integer.parseInt(sequencial));
 
         JobParametersBuilder jpb = new JobParametersBuilder();
         jpb.addString("fileDate", fileDate);
