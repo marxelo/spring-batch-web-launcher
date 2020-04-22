@@ -13,10 +13,7 @@
         <div class="row">
             <div class="col-md-6 mx-auto">
                 <h4 style="text-align: center;">Submissão de Jobs</h4>
-                <form action="#" th:action="@{/response}" th:object="${executionRequest}" method="post">
-                    <!-- <ul th:if="${#fields.hasErrors('*')}">
-                        <li th:each="error : ${#fields.errors('*')}" th:text="${error}">error</li>
-                    </ul> -->
+                <form action="#" th:action="@{/job-manager}" th:object="${executionRequest}" method="post">
                     <div class="col-md-6 form-group mx-auto">
                         <label>Nome do Job</label>
                         <select class="form-control" th:field="*{jobName}">
@@ -40,10 +37,10 @@
                     </div>
                     <div class="col-md-6 form-group mx-auto">
                         <button type="submit" class="btn btn-primary
-                                btn-block mt-3" name="action" value="execute">Solicitar execução</button>
+                                btn-block mt-3" name="action" value="execute">Submeter Job</button>
                     </div> <div class="col-md-6 form-group mx-auto">
                         <button type="submit" class="btn btn-primary
-                                btn-block mt-3" name="action" value="detail">Informações do Job</button>
+                              btn-block mt-3" name="action" value="detail">Detalhar Resultado</button>
                     </div>
                     <th:block th:if="${executionRequest.message != null}">
                         <p th:align="center" th:style="${'color: red;'}"><strong><span th:text="${executionRequest.message}"></span></strong>

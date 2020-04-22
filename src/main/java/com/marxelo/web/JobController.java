@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,17 +25,15 @@ public class JobController {
   @Autowired
   JobDetail jobDetail;
 
-  @GetMapping("/request")
+  @GetMapping("/job-manager")
   public String requestExecutionForm(Model model) {
 
     model.addAttribute("executionRequest", new ExecutionRequest());
     return "request";
   }
 
-  @RequestMapping(value = "/response", method = RequestMethod.POST, params = "action=execute")
-  // @PostMapping("/submit")
-  // public String processJobExecutionRequest(@ModelAttribute ExecutionRequest executionRequest) {
-  public String processJobExecutionRequest(@Valid ExecutionRequest executionRequest, BindingResult bindingResult, Model mode) {
+  @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=execute")
+  public String submitJob(@Valid ExecutionRequest executionRequest, BindingResult bindingResult, Model mode) {
 
     String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
     String jobName = executionRequest.getJobName();
@@ -70,15 +67,17 @@ public class JobController {
     return "response";
   }
 
-  @RequestMapping(value = "/response", method = RequestMethod.POST, params = "action=detail")
-  // @PostMapping("/jobDetail")
-  public String jobDetail(@Valid ExecutionRequest executionRequest, BindingResult bindingResult, Model mode) {
-    // public String jobDetail(@ModelAttribute ExecutionRequest executionRequest) {
+  @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=detail")
+  public String detailJob(@Valid ExecutionRequest executionRequest, BindingResult bindingResult, Model mode) {
 
     String fileDate = executionRequest.getFileDate().replaceAll("[^0-9]", "");
     String jobName = executionRequest.getJobName();
     String sequencial = executionRequest.getSequencial() + "";
     executionRequest.setMessage(null);
+
+    if (bindingResult.hasErrors()) {
+      return "request";
+    }
 
     if (!JobNameIsValid(jobName)) {
       executionRequest.setMessage("JobName não informado");
@@ -122,7 +121,7 @@ public class JobController {
   @GetMapping({ "", "/", "/**", "index", "index.html" })
   // as by default Spring maps unknown urls to "/**"
   public String notFound404() {
-    return "redirect:request";
+    return "redirect:job-manager";
     // return new JobExecutionRequest("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
   }
 
