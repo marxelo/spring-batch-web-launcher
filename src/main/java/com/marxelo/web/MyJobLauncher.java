@@ -37,7 +37,7 @@ public class MyJobLauncher {
         this.personJob = personJob;
     }
 
-    public CustomJobExecution run(String jobName, String fileDate, String sequencial) {
+    public CustomJobExecution run(String jobName, String fileDate, String identifier) {
 
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
@@ -48,13 +48,13 @@ public class MyJobLauncher {
                 execution = jobLauncher.run(personJob,
                         new JobParametersBuilder()
                                 .addString("fileDate", fileDate)
-                                .addString("sequencial", sequencial)
+                                .addString("identifier", identifier)
                                 .toJobParameters());
             } else {
                 execution = jobLauncher.run(creditJob,
                         new JobParametersBuilder()
                                 .addString("fileDate", fileDate)
-                                .addString("sequencial", sequencial)
+                                .addString("identifier", identifier)
                                 .toJobParameters());
             }
             LOGGER.info("Job Started");

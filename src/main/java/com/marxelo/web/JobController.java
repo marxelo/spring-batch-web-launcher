@@ -32,12 +32,12 @@ public class JobController {
     return "request";
   }
 
-  @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=execute")
+  @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=submit")
   public String submitJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
 
     String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
     String jobName = customJobExecution.getJobName();
-    String sequencial = customJobExecution.getSequencial() + "";
+    String identifier = customJobExecution.getIdentifier() + "";
     customJobExecution.setMessage(null);
 
     if (bindingResult.hasErrors()) {
@@ -54,7 +54,7 @@ public class JobController {
       return "request";
     }
 
-    CustomJobExecution cje = myJobLauncher.run(jobName, fileDate, sequencial);
+    CustomJobExecution cje = myJobLauncher.run(jobName, fileDate, identifier);
     LOGGER.info(cje.getJobStatus());
     customJobExecution.setJobStatus(cje.getJobStatus());
     customJobExecution.setMessage(cje.getMessage());
@@ -72,7 +72,7 @@ public class JobController {
 
     String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
     String jobName = customJobExecution.getJobName();
-    String sequencial = customJobExecution.getSequencial() + "";
+    String identifier = customJobExecution.getIdentifier() + "";
     customJobExecution.setMessage(null);
 
     if (bindingResult.hasErrors()) {
@@ -89,7 +89,7 @@ public class JobController {
       return "request";
     }
 
-    CustomJobExecution cje = jobDetail.getJobDetail(jobName, fileDate, sequencial);
+    CustomJobExecution cje = jobDetail.getJobDetail(jobName, fileDate, identifier);
     LOGGER.info(cje.getJobStatus());
     customJobExecution.setJobStatus(cje.getJobStatus());
     customJobExecution.setMessage(cje.getMessage());
@@ -103,7 +103,7 @@ public class JobController {
   public CustomJobExecution jer(
       @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
-      @RequestParam(value = "sequencial", defaultValue = "0") String sequencial) {
+      @RequestParam(value = "identifier", defaultValue = "0") String identifier) {
 
     if (!JobNameIsValid(jobName)) {
       return new CustomJobExecution("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
@@ -113,7 +113,7 @@ public class JobController {
       return new CustomJobExecution("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
     }
 
-    CustomJobExecution ere = myJobLauncher.run(jobName, fileDate, sequencial);
+    CustomJobExecution ere = myJobLauncher.run(jobName, fileDate, identifier);
     LOGGER.info(ere.getJobStatus());
     return new CustomJobExecution(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }
