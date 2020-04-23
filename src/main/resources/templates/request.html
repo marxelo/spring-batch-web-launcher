@@ -9,6 +9,11 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-static-top">
+        <span class="navbar-brand mb-0 h1">Cálculo da Receita de Intercâmbio -
+            Mastercard</span>
+    </nav>
+
     <div class="container my-3">
         <div class="row">
             <div class="col-md-6 mx-auto">
@@ -33,7 +38,7 @@
                         <label>Identificador*</label>
                         <input type="number" class="form-control" th:field="*{identifier}">
                         <span th:if="${#fields.hasErrors('identifier')}" class="help-block" th:errors="*{identifier}" th:style="${'color: red;'}"></span>
-                        <p th:align="center">*Altere apenas se reprocessamento</p>                        
+                        <p th:align="center" size="08">*Altere apenas se reprocessamento</p>                        
                     </div>
                     <div class="col-md-6 form-group mx-auto">
                         <button type="submit" class="btn btn-primary
