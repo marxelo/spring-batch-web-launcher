@@ -9,15 +9,19 @@ import com.marxelo.steps.mappers.ProfessionFieldSetMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemStreamException;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.batch.item.file.transform.FieldSet;
+import org.springframework.batch.item.support.SingleItemPeekableItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 
-public class PersonItemReader implements ItemReader<Person> {
+public class PersonItemReader implements ItemStreamReader<Person> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonItemReader.class);
 
     private Person person;
@@ -26,7 +30,7 @@ public class PersonItemReader implements ItemReader<Person> {
 
     private boolean recordFinished;
 
-    private ItemReader<FieldSet> fieldSetReader;
+    private SingleItemPeekableItemReader<FieldSet> fieldSetReader;
 
     @Nullable
     @Override
@@ -49,6 +53,10 @@ public class PersonItemReader implements ItemReader<Person> {
     private void process(FieldSet fieldSet) throws Exception {
 
         // finish processing if we hit the end of file
+        // fieldSetReader.peek();
+        System.out.println("Antes peek................::::::::");
+        String line = fieldSetReader.peek().readString(0);
+        System.out.println("Resultado peek................::::::::" + line);
         if (fieldSet == null) {
             LOGGER.debug("FINISHED");
             person = personCache;
@@ -91,7 +99,7 @@ public class PersonItemReader implements ItemReader<Person> {
         }
     }
 
-    public void setFieldSetReader(ItemReader<FieldSet> fieldSetReader) {
+    public void setFieldSetReader(SingleItemPeekableItemReader<FieldSet> fieldSetReader) {
         this.fieldSetReader = fieldSetReader;
     }
 
@@ -111,6 +119,24 @@ public class PersonItemReader implements ItemReader<Person> {
     public ProfessionFieldSetMapper professionMapper() {
         ProfessionFieldSetMapper mapper = new ProfessionFieldSetMapper();
         return mapper;
+    }
+
+    @Override
+    public void open(ExecutionContext executionContext) throws ItemStreamException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void update(ExecutionContext executionContext) throws ItemStreamException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void close() throws ItemStreamException {
+        // TODO Auto-generated method stub
+
     }
 
 }

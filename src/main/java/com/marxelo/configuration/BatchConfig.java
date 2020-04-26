@@ -38,6 +38,8 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.mapping.PassThroughFieldSetMapper;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
+import org.springframework.batch.item.support.SingleItemPeekableItemReader;
+import org.springframework.batch.item.support.builder.SingleItemPeekableItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -160,9 +162,11 @@ public class BatchConfig {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['fileDate']}") String fileDate) {
+    public SingleItemPeekableItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['fileDate']}") String fileDate) {
         System.out.println("FileDate in reader.....:" + fileDate);
 
+        SingleItemPeekableItemReader<FieldSet> peekableItemReader;
+        
         String formattedString = fileDate;
         if (Objects.isNull(formattedString)) {
             LocalDate localDate = LocalDate.now().minusDays(1L);
@@ -181,6 +185,9 @@ public class BatchConfig {
         defaultLineMapper.setFieldSetMapper(new PassThroughFieldSetMapper());
         reader.setLineMapper(defaultLineMapper);
         reader.setBufferedReaderFactory(new MyBufferedReaderFactory());
+        peekableItemReader = new SingleItemPeekableItemReaderBuilder<FieldSet>()
+        .delegate(reader)
+        .build();
         return reader;
     }
 
