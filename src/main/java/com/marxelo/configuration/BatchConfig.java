@@ -10,6 +10,7 @@ import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.CreditItemProcessor;
 import com.marxelo.steps.PersonItemProcessor;
 import com.marxelo.steps.PersonItemReader;
+import com.marxelo.steps.PersonItemReaderX;
 import com.marxelo.steps.PersonItemWriter;
 import com.marxelo.steps.personStepExecutionListener;
 import com.marxelo.steps.skippers.MySkipListener;
@@ -30,6 +31,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.MultiResourceItemReader;
@@ -142,7 +144,7 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
+    // @Bean
     public Job creditJob() {
         return jobBuilderFactory.get("creditJob")
                 .incrementer(new RunIdIncrementer())
@@ -217,7 +219,7 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean
+    // @Bean
     public Job personJob() {
         return jobBuilderFactory.get("personJob")
                 .incrementer(new RunIdIncrementer())
@@ -226,6 +228,40 @@ public class BatchConfig {
                 .listener(new JobResultListener())
                 .build();
     }
+
+    // <--------------- Fim PersonStep ---------------->
+    // <------------ Inicio Person Step com peek ------>
+
+    @Bean
+    public ItemStreamReader<Person> itemReaderX() {
+        return new PersonItemReaderX();
+    }
+
+    @Bean
+    public Step personStepX() {
+        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
+                .reader(itemReaderX())
+                .processor(personItemProcessor())
+                .writer(personWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new PersonSkipListener())
+                // .stream(personFileItemReader(WILL_BE_INJECTED))
+                .listener(new personStepExecutionListener())
+                .build();
+    }
+
+    @Bean
+    public Job personJobX() {
+        return jobBuilderFactory.get("personJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadFileStep())
+                .next(personStepX())
+                .listener(new JobResultListener())
+                .build();
+    }
+
+    // <-------- Fim PersonStep com peek -------------->
 
     @Bean(destroyMethod = "shutdown")
     public ThreadPoolTaskScheduler taskScheduler(@Value("${thread.pool.size}") int threadPoolSize) {
