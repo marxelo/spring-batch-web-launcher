@@ -1,5 +1,9 @@
 package com.marxelo.steps;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
 import com.marxelo.configuration.MyBufferedReaderFactory;
 import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.mappers.AddressFieldSetMapper;
@@ -23,7 +27,7 @@ import org.springframework.batch.item.file.mapping.PassThroughFieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
 import org.springframework.batch.item.support.SingleItemPeekableItemReader;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 
 public class PersonItemReaderX implements ItemStreamReader<Person> {
 
@@ -32,9 +36,21 @@ public class PersonItemReaderX implements ItemStreamReader<Person> {
 
     @BeforeStep
     public void beforeStep(StepExecution stepExecution) {
+        String formattedString = stepExecution.getJobParameters().getString("fileDate");
+        System.out.println("hahahahah fileDate" + formattedString);
+
+        if (Objects.isNull(formattedString)) {
+            LocalDate localDate = LocalDate.now().minusDays(1L);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            formattedString = localDate.format(formatter);
+        } else {
+            LOGGER.info("Utilizando a data de processamento = " + formattedString);
+        }
+
         FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
 
-        reader.setResource(new ClassPathResource("pessoas-20200606.txt"));
+        // reader.setResource(new ClassPathResource("pessoas-20200606.txt"));
+        reader.setResource(new FileSystemResource("src/main/resources/pessoas-" + formattedString + ".txt"));
         final DefaultLineMapper<FieldSet> defaultLineMapper = new DefaultLineMapper<>();
         defaultLineMapper.setLineTokenizer(personTokenizers());
         defaultLineMapper.setFieldSetMapper(new PassThroughFieldSetMapper());
@@ -57,6 +73,7 @@ public class PersonItemReaderX implements ItemStreamReader<Person> {
     @Override
     public Person read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         LOGGER.info("start read");
+        System.out.println("start read");
 
         Person record = null;
 
@@ -80,6 +97,7 @@ public class PersonItemReaderX implements ItemStreamReader<Person> {
 
         }
         LOGGER.info("end read");
+        System.out.println("end read");
         return record;
     }
 

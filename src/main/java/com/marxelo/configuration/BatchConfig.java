@@ -220,14 +220,14 @@ public class BatchConfig {
     }
 
     // @Bean
-    public Job personJob() {
-        return jobBuilderFactory.get("personJob")
-                .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep())
-                .next(personStep())
-                .listener(new JobResultListener())
-                .build();
-    }
+    // public Job personJob() {
+    //     return jobBuilderFactory.get("personJob")
+    //             .incrementer(new RunIdIncrementer())
+    //             .start(downloadFileStep())
+    //             .next(personStep())
+    //             .listener(new JobResultListener())
+    //             .build();
+    // }
 
     // <--------------- Fim PersonStep ---------------->
     // <------------ Inicio Person Step com peek ------>
@@ -252,7 +252,7 @@ public class BatchConfig {
     }
 
     @Bean
-    public Job personJobX() {
+    public Job personJob() {
         return jobBuilderFactory.get("personJob")
                 .incrementer(new RunIdIncrementer())
                 .start(downloadFileStep())
