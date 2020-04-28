@@ -78,6 +78,7 @@ public class PersonItemReaderX implements ItemStreamReader<Person> {
         Person record = null;
 
         FieldSet fieldSet;
+
         while ((fieldSet = delegate.read()) != null) {
             String prefix = fieldSet.readString(0);
             // String prefix = fieldSet.readString("lineType");
