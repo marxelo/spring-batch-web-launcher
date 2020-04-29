@@ -12,7 +12,6 @@ import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
 import com.marxelo.steps.skippers.PersonSkipListener;
 import com.marxelo.steps.tasklets.DownloadFileTasklet;
-import com.marxelo.steps.tokenizers.PersonCompositeLineTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +47,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableScheduling
 public class BatchConfig {
 
-    static Resource[] resourceData = new Resource[] { new ClassPathResource("data1.csv") };
-    static Resource[] resourcePessoas = new Resource[] { new ClassPathResource("pessoas.txt") };
+    static Resource[] resourceData = new Resource[] {
+            new ClassPathResource("data1.csv"),
+            new ClassPathResource("data2.csv") };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
 
@@ -77,7 +77,7 @@ public class BatchConfig {
     // }
 
     @Bean
-    public FlatFileItemReader<String> creditItemReader() {
+    public FlatFileItemReader<String> itemReader() {
         return new FlatFileItemReaderBuilder<String>()
                 .name("creditItemReader")
                 .lineMapper(new PassThroughLineMapper())
@@ -88,7 +88,7 @@ public class BatchConfig {
     public ItemReader<String> multiResourceItemReader() {
         final MultiResourceItemReader<String> reader = new MultiResourceItemReader<>();
         reader.setResources(resourceData);
-        reader.setDelegate(creditItemReader());
+        reader.setDelegate(itemReader());
         return reader;
     }
 
@@ -142,11 +142,6 @@ public class BatchConfig {
     }
 
     //  <--------------------------- Person --------------------------------->
-    @Bean
-    public PersonCompositeLineTokenizer personTokenizers() {
-        PersonCompositeLineTokenizer tokenizers = new PersonCompositeLineTokenizer();
-        return tokenizers;
-    }
 
     public PersonItemProcessor personItemProcessor() {
         PersonItemProcessor processor = new PersonItemProcessor();
@@ -160,14 +155,14 @@ public class BatchConfig {
     }
 
     @Bean
-    public ItemStreamReader<Person> itemReader() {
+    public ItemStreamReader<Person> itemStreamReader() {
         return new PersonItemReader();
     }
 
     @Bean
     public Step personStep() {
         return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
-                .reader(itemReader())
+                .reader(itemStreamReader())
                 .processor(personItemProcessor())
                 .writer(personWriter())
                 .faultTolerant()
