@@ -7,6 +7,7 @@ import com.marxelo.steps.CreditItemProcessor;
 import com.marxelo.steps.PersonItemProcessor;
 import com.marxelo.steps.PersonItemReader;
 import com.marxelo.steps.PersonItemWriter;
+import com.marxelo.steps.PersonMultiResourceReader;
 import com.marxelo.steps.personStepExecutionListener;
 import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
@@ -156,14 +157,15 @@ public class BatchConfig {
 
     @Bean
     public ItemStreamReader<Person> itemStreamReader() {
-        return new PersonItemReader();
+        return new PersonMultiResourceReader();
+        // return new PersonItemReader();
     }
 
     @Bean
     public Step personStep() {
         return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
-                .reader(itemStreamReader())
                 .processor(personItemProcessor())
+                .reader(itemStreamReader())
                 .writer(personWriter())
                 .faultTolerant()
                 .skipPolicy(new MySkipPolicy())
