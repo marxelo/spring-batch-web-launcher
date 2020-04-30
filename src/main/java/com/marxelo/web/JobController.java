@@ -1,18 +1,12 @@
 package com.marxelo.web;
 
-import javax.validation.Valid;
-
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,48 +15,64 @@ public class JobController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
 
+  String BAD_REQUEST_MESSAGE = "Invalid job name. Informe no formato /job/{action}/{jobName}/{fileDate/{identifier}";
+  String ACTION_START = "start";
+  String ACTION_DETAIL = "detail";
+
   @Autowired
   MyJobLauncher myJobLauncher;
 
   @Autowired
   JobDetail jobDetail;
 
-  @GetMapping("/job/start")
+  @GetMapping("/job/{action}/{jobName}/{fileDate}/{identifier}")
   public CustomJobExecution jer(
-      @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
-      @RequestParam(value = "fileDate") String fileDate,
-      @RequestParam(value = "identifier", defaultValue = "0") String identifier) {
+      @PathVariable("action") String action,
+      @PathVariable("jobName") String jobName,
+      @PathVariable("fileDate") String fileDate,
+      @PathVariable("identifier") String identifier) {
+
+    CustomJobExecution response = new CustomJobExecution();
+    response.setJobName(jobName);
+    response.setFileDate(fileDate);
+
+    if ((!action.equals(ACTION_START)) && (!action.equals(ACTION_DETAIL))) {
+      response.setMessage("Invalid action request. " + BAD_REQUEST_MESSAGE);
+      return response;
+    }
 
     if (!JobNameIsValid(jobName)) {
-      return new CustomJobExecution("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+      response.setMessage("Invalid jobname. " + BAD_REQUEST_MESSAGE);
+      return response;
     }
 
     if (!FileDateIsValid(fileDate)) {
-      return new CustomJobExecution("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+      response.setMessage("Invalid fileDate. " + BAD_REQUEST_MESSAGE);
+      return response;
     }
 
-    CustomJobExecution ere = myJobLauncher.run(jobName, fileDate, identifier);
-    LOGGER.info(ere.getJobStatus());
-    return new CustomJobExecution(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
-  }
-
-  @GetMapping("/job/detail")
-  public CustomJobExecution jed(
-      @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
-      @RequestParam(value = "fileDate") String fileDate,
-      @RequestParam(value = "identifier", defaultValue = "0") String identifier) {
-
-    if (!JobNameIsValid(jobName)) {
-      return new CustomJobExecution("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    if (!isInteger(identifier)) {
+      response.setMessage("Identifier is not an integer. " + BAD_REQUEST_MESSAGE);
+      return response;
     }
 
-    if (!FileDateIsValid(fileDate)) {
-      return new CustomJobExecution("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    response.setIdentifier(Integer.parseInt(identifier));
+
+    CustomJobExecution cje = new CustomJobExecution();
+
+    if (action.equals(ACTION_START)) {
+      cje = myJobLauncher.run(jobName, fileDate, identifier);
+    } else {
+      cje = jobDetail.getJobDetail(jobName, fileDate, identifier);
     }
 
-    CustomJobExecution ere = jobDetail.getJobDetail(jobName, fileDate, identifier);
-    LOGGER.info(ere.getJobStatus());
-    return new CustomJobExecution(jobName, fileDate, Integer.parseInt(identifier), ere.getJobStatus(), ere.getJobExecutionDetail(), ere.getStepExecutionDetail(), ere.getMessage());
+    response.setJobExecutionDetail(cje.getJobExecutionDetail());
+    response.setStepExecutionDetail(cje.getStepExecutionDetail());
+    response.setJobStatus(cje.getJobStatus());
+    response.setMessage(cje.getMessage());
+
+    LOGGER.info(cje.getJobStatus());
+    return response;
   }
 
   @GetMapping({ "/job/cronJobStart" })
@@ -72,7 +82,7 @@ public class JobController {
 
   @GetMapping({ "/**" })
   public String notFound404() {
-    return "Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd";
+    return BAD_REQUEST_MESSAGE;
   }
 
   public Boolean JobNameIsValid(String jobName) {
@@ -81,6 +91,17 @@ public class JobController {
 
   public Boolean FileDateIsValid(String fileDate) {
     return (GenericValidator.isDate(fileDate, "yyyyMMdd", true));
+  }
+
+  public Boolean isInteger(String identifier) {
+    try {
+      Integer.parseInt(identifier);
+    } catch (NumberFormatException e) {
+      return false;
+    } catch (NullPointerException e) {
+      return false;
+    }
+    return true;
   }
 
 }
