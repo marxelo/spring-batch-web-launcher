@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
+@RequestMapping("/")
 public class JobController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
@@ -25,81 +27,7 @@ public class JobController {
   @Autowired
   JobDetail jobDetail;
 
-  @GetMapping("/job-manager")
-  public String formSubmission(Model model) {
-
-    model.addAttribute("customJobExecution", new CustomJobExecution());
-    return "request";
-  }
-
-  @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=submit")
-  public String submitJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
-
-    String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
-    String jobName = customJobExecution.getJobName();
-    String identifier = customJobExecution.getIdentifier() + "";
-    customJobExecution.setMessage(null);
-
-    if (bindingResult.hasErrors()) {
-      return "request";
-    }
-
-    if (!JobNameIsValid(jobName)) {
-      customJobExecution.setMessage("JobName não informado");
-      return "request";
-    }
-
-    if (!FileDateIsValid(fileDate)) {
-      customJobExecution.setMessage("Data do arquivo não informada");
-      return "request";
-    }
-
-    CustomJobExecution cje = myJobLauncher.run(jobName, fileDate, identifier);
-    LOGGER.info(cje.getJobStatus());
-    customJobExecution.setJobStatus(cje.getJobStatus());
-    customJobExecution.setMessage(cje.getMessage());
-
-    if (cje.getMessage() == null) {
-      customJobExecution.setMessage("Aguarde conclusão do job!");
-      return "request";
-    }
-
-    return "response";
-  }
-
-  @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=detail")
-  public String detailJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
-
-    String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
-    String jobName = customJobExecution.getJobName();
-    String identifier = customJobExecution.getIdentifier() + "";
-    customJobExecution.setMessage(null);
-
-    if (bindingResult.hasErrors()) {
-      return "request";
-    }
-
-    if (!JobNameIsValid(jobName)) {
-      customJobExecution.setMessage("JobName não informado");
-      return "request";
-    }
-
-    if (!FileDateIsValid(fileDate)) {
-      customJobExecution.setMessage("Data do arquivo não informada");
-      return "request";
-    }
-
-    CustomJobExecution cje = jobDetail.getJobDetail(jobName, fileDate, identifier);
-    LOGGER.info(cje.getJobStatus());
-    customJobExecution.setJobStatus(cje.getJobStatus());
-    customJobExecution.setMessage(cje.getMessage());
-    customJobExecution.setJobExecutionDetail(cje.getJobExecutionDetail());
-    customJobExecution.setStepExecutionDetail(cje.getStepExecutionDetail());
-
-    return "response";
-  }
-
-  @GetMapping("/startJob")
+  @GetMapping("/job/start")
   public CustomJobExecution jer(
       @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
@@ -118,11 +46,33 @@ public class JobController {
     return new CustomJobExecution(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }
 
-  @GetMapping({ "", "/", "/**", "index", "index.html" })
-  // as by default Spring maps unknown urls to "/**"
+  @GetMapping("/job/detail")
+  public CustomJobExecution jed(
+      @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
+      @RequestParam(value = "fileDate") String fileDate,
+      @RequestParam(value = "identifier", defaultValue = "0") String identifier) {
+
+    if (!JobNameIsValid(jobName)) {
+      return new CustomJobExecution("Invalid job name. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    }
+
+    if (!FileDateIsValid(fileDate)) {
+      return new CustomJobExecution("Invalid date. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    }
+
+    CustomJobExecution ere = jobDetail.getJobDetail(jobName, fileDate, identifier);
+    LOGGER.info(ere.getJobStatus());
+    return new CustomJobExecution(jobName, fileDate, Integer.parseInt(identifier), ere.getJobStatus(), ere.getJobExecutionDetail(), ere.getStepExecutionDetail(), ere.getMessage());
+  }
+
+  @GetMapping({ "/job/cronJobStart" })
+  public String cronJob() {
+    return "job submitted";
+  }
+
+  @GetMapping({ "/**" })
   public String notFound404() {
-    return "redirect:job-manager";
-    // return new CustomJobExecution("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    return "Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd";
   }
 
   public Boolean JobNameIsValid(String jobName) {
