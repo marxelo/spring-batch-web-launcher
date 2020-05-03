@@ -10,6 +10,7 @@ import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.CreditItemProcessor;
 import com.marxelo.steps.PersonItemProcessor;
 import com.marxelo.steps.PersonItemReader;
+import com.marxelo.steps.PersonItemReaderX;
 import com.marxelo.steps.PersonItemWriter;
 import com.marxelo.steps.personStepExecutionListener;
 import com.marxelo.steps.skippers.MySkipListener;
@@ -38,6 +39,7 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.mapping.PassThroughFieldSetMapper;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
+import org.springframework.batch.item.support.SingleItemPeekableItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +59,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class BatchConfig {
 
     static Resource[] resourceData = new Resource[] { new ClassPathResource("data1.csv") };
-    static Resource[] resourcePessoas = new Resource[] { new ClassPathResource("pessoas.txt") };
+    static Resource[] resourcePessoas = new Resource[] { new ClassPathResource("pessoas.txt"),
+            new ClassPathResource("pessoas-20200606.txt") };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
 
@@ -151,6 +154,61 @@ public class BatchConfig {
                 .build();
     }
 
+    //  <--------------------------- PersonX --------------------------------->
+
+    @Bean
+    public FlatFileItemReader<FieldSet> reader() {
+        FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
+        reader.setLineMapper(new DefaultLineMapper() {
+            {
+                setLineTokenizer(personTokenizers());
+            }
+            {
+                setFieldSetMapper(new PassThroughFieldSetMapper());
+            }
+        });
+        reader.setBufferedReaderFactory(new MyBufferedReaderFactory());
+        return reader;
+    }
+
+    @Bean
+    public MultiResourceItemReader<FieldSet> multiResourceItemReaderX() {
+        MultiResourceItemReader<FieldSet> resourceItemReader = new MultiResourceItemReader<FieldSet>();
+        resourceItemReader.setResources(resourcePessoas);
+        resourceItemReader.setDelegate(reader());
+        return resourceItemReader;
+    }
+
+    @Bean
+    public SingleItemPeekableItemReader<FieldSet> readerPeek() {
+        SingleItemPeekableItemReader<FieldSet> reader = new SingleItemPeekableItemReader<>();
+        reader.setDelegate(multiResourceItemReaderX());
+        return reader;
+    }
+
+    @Bean
+    @StepScope
+    public PersonItemReaderX personItemReaderX() {
+        PersonItemReaderX reader = new PersonItemReaderX(null);
+        // reader.setFieldSetReader(personFileItemReader(WILL_BE_INJECTED));
+        reader.setSingalPeekable(readerPeek());
+        return reader;
+    }
+
+    @Bean
+    public Step personStepX() {
+        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
+                .reader(personItemReaderX())
+                .processor(personItemProcessor())
+                .writer(personWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new PersonSkipListener())
+                // .stream(personFileItemReader(WILL_BE_INJECTED))
+                .listener(new personStepExecutionListener())
+                .build();
+    }
+
     //  <--------------------------- Person --------------------------------->
     @Bean
     public PersonCompositeLineTokenizer personTokenizers() {
@@ -158,39 +216,39 @@ public class BatchConfig {
         return tokenizers;
     }
 
-    @Bean
-    @StepScope
-    public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['fileDate']}") String fileDate) {
-        System.out.println("FileDate in reader.....:" + fileDate);
+    // @Bean
+    // @StepScope
+    // public FlatFileItemReader<FieldSet> personFileItemReader(@Value("#{jobParameters['fileDate']}") String fileDate) {
+    //     System.out.println("FileDate in reader.....:" + fileDate);
 
-        String formattedString = fileDate;
-        if (Objects.isNull(formattedString)) {
-            LocalDate localDate = LocalDate.now().minusDays(1L);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-            formattedString = localDate.format(formatter);
-        } else {
-            LOGGER.info("Utilizando a data de processamento = " + formattedString);
-        }
+    //     String formattedString = fileDate;
+    //     if (Objects.isNull(formattedString)) {
+    //         LocalDate localDate = LocalDate.now().minusDays(1L);
+    //         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    //         formattedString = localDate.format(formatter);
+    //     } else {
+    //         LOGGER.info("Utilizando a data de processamento = " + formattedString);
+    //     }
 
-        FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
-        // reader.setResource(new ClassPathResource(
-        //         "resources/pessoas.txt"));
-        reader.setResource(new FileSystemResource("src/main/resources/pessoas-" + formattedString + ".txt"));
-        final DefaultLineMapper<FieldSet> defaultLineMapper = new DefaultLineMapper<>();
-        defaultLineMapper.setLineTokenizer(personTokenizers());
-        defaultLineMapper.setFieldSetMapper(new PassThroughFieldSetMapper());
-        reader.setLineMapper(defaultLineMapper);
-        reader.setBufferedReaderFactory(new MyBufferedReaderFactory());
-        return reader;
-    }
+    //     FlatFileItemReader<FieldSet> reader = new FlatFileItemReader<>();
+    //     // reader.setResource(new ClassPathResource(
+    //     //         "resources/pessoas.txt"));
+    //     reader.setResource(new FileSystemResource("src/main/resources/pessoas-" + formattedString + ".txt"));
+    //     final DefaultLineMapper<FieldSet> defaultLineMapper = new DefaultLineMapper<>();
+    //     defaultLineMapper.setLineTokenizer(personTokenizers());
+    //     defaultLineMapper.setFieldSetMapper(new PassThroughFieldSetMapper());
+    //     reader.setLineMapper(defaultLineMapper);
+    //     reader.setBufferedReaderFactory(new MyBufferedReaderFactory());
+    //     return reader;
+    // }
 
-    @Bean
-    @StepScope
-    public PersonItemReader personItemReader() {
-        PersonItemReader reader = new PersonItemReader();
-        reader.setFieldSetReader(personFileItemReader(WILL_BE_INJECTED));
-        return reader;
-    }
+    // @Bean
+    // @StepScope
+    // public PersonItemReader personItemReader() {
+    //     PersonItemReader reader = new PersonItemReader();
+    //     reader.setFieldSetReader(personFileItemReader(WILL_BE_INJECTED));
+    //     return reader;
+    // }
 
     public PersonItemProcessor personItemProcessor() {
         PersonItemProcessor processor = new PersonItemProcessor();
@@ -203,26 +261,26 @@ public class BatchConfig {
         return writer;
     }
 
-    @Bean
-    public Step personStep() {
-        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
-                .reader(personItemReader())
-                .processor(personItemProcessor())
-                .writer(personWriter())
-                .faultTolerant()
-                .skipPolicy(new MySkipPolicy())
-                .listener(new PersonSkipListener())
-                .stream(personFileItemReader(WILL_BE_INJECTED))
-                .listener(new personStepExecutionListener())
-                .build();
-    }
+    // @Bean
+    // public Step personStep() {
+    //     return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
+    //             .reader(personItemReader())
+    //             .processor(personItemProcessor())
+    //             .writer(personWriter())
+    //             .faultTolerant()
+    //             .skipPolicy(new MySkipPolicy())
+    //             .listener(new PersonSkipListener())
+    //             .stream(personFileItemReader(WILL_BE_INJECTED))
+    //             .listener(new personStepExecutionListener())
+    //             .build();
+    // }
 
     @Bean
     public Job personJob() {
         return jobBuilderFactory.get("personJob")
                 .incrementer(new RunIdIncrementer())
                 .start(downloadFileStep())
-                .next(personStep())
+                .next(personStepX())
                 .listener(new JobResultListener())
                 .build();
     }

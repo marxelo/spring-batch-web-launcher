@@ -18,7 +18,7 @@ public class PersonItemProcessor implements ItemProcessor<Person, Person> {
         System.out.println("Processing item: " + person.toString());
         // Aguardar o último envio de métrica
         try {
-            Thread.sleep(7500L);
+            Thread.sleep(1500L);
             LOGGER.info("awake");
         } catch (InterruptedException e) {
 
