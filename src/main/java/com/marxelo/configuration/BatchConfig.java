@@ -66,6 +66,8 @@ public class BatchConfig {
 
     private static final String WILL_BE_INJECTED = null;
 
+    String BASE_DIR = "src/main/resources/";
+
     @Autowired
     PlatformTransactionManager transactionManager;
 
@@ -172,9 +174,26 @@ public class BatchConfig {
     }
 
     @Bean
-    public MultiResourceItemReader<FieldSet> multiResourceItemReaderX() {
+    @StepScope
+    public MultiResourceItemReader<FieldSet> multiResourceItemReaderX(@Value("#{jobParameters['fileDate']}") String fileDate) {
+        System.out.println("FileDate in reader.....:" + fileDate);
+
+        String formattedString = fileDate;
+        if (Objects.isNull(formattedString)) {
+            LocalDate localDate = LocalDate.now().minusDays(1L);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            formattedString = localDate.format(formatter);
+        } else {
+            LOGGER.info("Utilizando a data de processamento = " + formattedString);
+        }
+
+        Resource[] inputResources = {
+                new FileSystemResource(
+                        BASE_DIR + "pessoas-" + formattedString + ".S1.txt"),
+                new FileSystemResource(
+                        BASE_DIR + "pessoas-" + formattedString + ".S2.txt") };
         MultiResourceItemReader<FieldSet> resourceItemReader = new MultiResourceItemReader<FieldSet>();
-        resourceItemReader.setResources(resourcePessoas);
+        resourceItemReader.setResources(inputResources);
         resourceItemReader.setDelegate(reader());
         return resourceItemReader;
     }
@@ -182,7 +201,7 @@ public class BatchConfig {
     @Bean
     public SingleItemPeekableItemReader<FieldSet> readerPeek() {
         SingleItemPeekableItemReader<FieldSet> reader = new SingleItemPeekableItemReader<>();
-        reader.setDelegate(multiResourceItemReaderX());
+        reader.setDelegate(multiResourceItemReaderX(null));
         return reader;
     }
 
@@ -190,7 +209,6 @@ public class BatchConfig {
     @StepScope
     public PersonItemReaderX personItemReaderX() {
         PersonItemReaderX reader = new PersonItemReaderX(null);
-        // reader.setFieldSetReader(personFileItemReader(WILL_BE_INJECTED));
         reader.setSingalPeekable(readerPeek());
         return reader;
     }

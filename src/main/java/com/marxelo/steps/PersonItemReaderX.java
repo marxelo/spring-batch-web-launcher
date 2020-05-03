@@ -65,9 +65,9 @@ public class PersonItemReaderX implements ItemStreamReader<Person> {
 
     }
 
-    public void setFieldSetReader(ItemReader<FieldSet> fieldSetReader) {
-        this.fieldSetReader = fieldSetReader;
-    }
+    // public void setFieldSetReader(ItemReader<FieldSet> fieldSetReader) {
+    //     this.fieldSetReader = fieldSetReader;
+    // }
 
     public SingleItemPeekableItemReader<FieldSet> getSingalPeekable() {
         return delegate;
