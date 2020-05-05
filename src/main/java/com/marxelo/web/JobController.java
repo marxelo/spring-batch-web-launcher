@@ -34,7 +34,7 @@ public class JobController {
   }
 
   @RequestMapping(value = "/job-manager", method = RequestMethod.POST)
-  public String submitJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode,
+  public String handleActionRequest(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode,
       @RequestParam("action") String action) {
 
     String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
