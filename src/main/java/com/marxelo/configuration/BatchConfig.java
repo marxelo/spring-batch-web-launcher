@@ -12,6 +12,7 @@ import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
 import com.marxelo.steps.skippers.PersonSkipListener;
 import com.marxelo.steps.tasklets.DownloadFileTasklet;
+import com.marxelo.steps.tasklets.FileDeletingTasklet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,11 +134,23 @@ public class BatchConfig {
     }
 
     @Bean
+    public FileDeletingTasklet filedDeletingTasklet() {
+        return new FileDeletingTasklet();
+    }
+
+    @Bean
+    public Step deleteFileStep() {
+        return stepBuilderFactory.get("deletFileStep")
+                .tasklet(filedDeletingTasklet())
+                .build();
+    }
+    @Bean
     public Job creditJob() {
         return jobBuilderFactory.get("creditJob")
                 .incrementer(new RunIdIncrementer())
                 .start(downloadFileStep())
                 .next(creditStep())
+                .next(deleteFileStep())
                 .build();
     }
 
