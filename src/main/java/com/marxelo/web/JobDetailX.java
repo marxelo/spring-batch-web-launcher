@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class JobDetail {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
+public class JobDetailX {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobDetail.class);
 
     @Autowired
     private JobExplorer jobExplorer;
@@ -29,17 +29,16 @@ public class JobDetail {
         jpb.addString("fileDate", fileDate);
         jpb.addString("identifier", identifier);
         JobParameters jobParameters = jpb.toJobParameters();
-        int JOB_INSTANCE_COUNT = 30;
+        int JOB_INSTANCE_COUNT = 10;
 
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, JOB_INSTANCE_COUNT);
 
         instanceForLoop: for (JobInstance jobInstance : jobInstances) {
-
             List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
             try {
                 for (JobExecution jobExecution : jobExecutions) {
-
-                    if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())) {
+                    if (jobExecution.getJobParameters().getString("fileDate").equals(fileDate) &&
+                            jobExecution.getJobParameters().getString("identifier").equals(identifier)) {
                         cje.setJobStatus(jobExecution.getStatus().toString());
                         cje.setJobExecutionDetail(jobExecution.toString());
                         if (jobExecution.getStatus().toString().equals("FAILED")) {
@@ -49,14 +48,14 @@ public class JobDetail {
                         Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
                         try {
                             for (StepExecution stepExecution : stepExecutions) {
-
-                                if ((stepExecution.getStepName().equals("personStep"))
-                                        || (stepExecution.getStepName().equals("creditStep"))) {
+                                if ((stepExecution.getStepName().equals("masterCreditProcessFileStep"))
+                                        || (stepExecution.getStepName().equals("masterDebitProcessFileStep"))) {
 
                                     cje.setStepExecutionDetail(stepExecution.toString());
                                     break instanceForLoop;
                                 }
                             }
+                            break instanceForLoop;
                         } catch (Exception e) {
                             if (e instanceof NullPointerException) {
                                 cje.setMessage("No information found for job {" + jobName + "} with parameters "
@@ -68,7 +67,6 @@ public class JobDetail {
                                         + jobParameters.toString());
                             }
                         }
-
                     }
                 }
             } catch (Exception e) {
@@ -82,11 +80,10 @@ public class JobDetail {
                             + jobParameters.toString());
                 }
             }
-
         }
-
         if (cje.getJobStatus() == null) {
             cje.setMessage("No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
+
         }
         LOGGER.info(cje.toString());
         return cje;

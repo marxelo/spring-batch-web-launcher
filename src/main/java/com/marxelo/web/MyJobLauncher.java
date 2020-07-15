@@ -82,6 +82,7 @@ public class MyJobLauncher {
                 jobStatus = "FAILED";
             }
         }
+        System.out.println();
         return new CustomJobExecution(jobStatus, msg);
     }
 

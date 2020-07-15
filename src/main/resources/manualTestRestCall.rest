@@ -4,18 +4,18 @@
 ### Test personJob
 
 @time = 010102
-GET http://localhost:8080/startJob?jobName=personJob&fileDate=20200412&time={{time}} HTTP/1.1
+GET http://localhost:8090/startJob?jobName=personJob&fileDate=20200412&time={{time}} HTTP/1.1
 
 
 ### Test personJob sending time parameters to re-run a job with same file date
-GET http://localhost:8080/startJob?jobName=personJob&fileDate=20200412&time=010101 HTTP/1.1
+GET http://localhost:8090/startJob?jobName=personJob&fileDate=20200412&time=010101 HTTP/1.1
 
 
 #### Start CreditJob
-GET http://localhost:8080/startJob?jobName=debitJob&fileDate=20200412 HTTP/1.1
+GET http://localhost:8090/startJob?jobName=debitJob&fileDate=20200412 HTTP/1.1
 
 ### Send a bad request
-GET http://localhost:8080/a/index.html HTTP/1.1
+GET http://localhost:8090/a/index.html HTTP/1.1
 
 
 
@@ -23,15 +23,15 @@ GET http://localhost:8080/a/index.html HTTP/1.1
 @jobName = personJob
 @fileDate = 20200411
 @time = 223902
-GET http://localhost:8080/startJob?jobName={{jobName}}&fileDate={{fileDate}}&time={{time}}
+GET http://localhost:8090/startJob?jobName={{jobName}}&fileDate={{fileDate}}&time={{time}}
 
 ### Test personJob - 
 
-GET http://localhost:8080/startJob
+GET http://localhost:8090/startJob
 ?jobName=personJob
 &fileDate=20200412
 &time=001522
 # HTTP/1.1
 
 ### Teste upload.html
-http://localhost:8080/upload
+http://localhost:8090/upload
