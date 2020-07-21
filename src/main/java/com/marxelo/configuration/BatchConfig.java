@@ -4,10 +4,10 @@ import javax.annotation.PreDestroy;
 
 import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.CreditItemProcessor;
+import com.marxelo.steps.MyStepExecutionListener;
 import com.marxelo.steps.PersonItemProcessor;
 import com.marxelo.steps.PersonItemReader;
 import com.marxelo.steps.PersonItemWriter;
-import com.marxelo.steps.personStepExecutionListener;
 import com.marxelo.steps.skippers.MySkipListener;
 import com.marxelo.steps.skippers.MySkipPolicy;
 import com.marxelo.steps.skippers.PersonSkipListener;
@@ -79,7 +79,9 @@ public class BatchConfig {
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
-        return new FlatFileItemReaderBuilder<String>().name("creditItemReader").lineMapper(new PassThroughLineMapper())
+        return new FlatFileItemReaderBuilder<String>()
+                .name("creditItemReader")
+                .lineMapper(new PassThroughLineMapper())
                 .build();
     }
 
@@ -109,9 +111,16 @@ public class BatchConfig {
 
     @Bean
     public Step creditStep() {
-        return stepBuilderFactory.get("creditStep").<String, String> chunk(1).reader(multiResourceItemReader())
-                .processor(creditItemProcessor()).writer(itemWriter()).faultTolerant().skipPolicy(new MySkipPolicy())
-                .listener(new MySkipListener()).build();
+        return stepBuilderFactory.get("creditStep")
+                .<String, String> chunk(1)
+                .reader(multiResourceItemReader())
+                .processor(creditItemProcessor())
+                .writer(itemWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new MySkipListener())
+                .listener(new MyStepExecutionListener())
+                .build();
     }
 
     @Bean
@@ -121,13 +130,18 @@ public class BatchConfig {
 
     @Bean
     public Step downloadFileStep() {
-        return stepBuilderFactory.get("downloadFileStep").tasklet(downloadFileTasklet()).build();
+        return stepBuilderFactory.get("downloadFileStep")
+                .tasklet(downloadFileTasklet())
+                .build();
     }
 
     @Bean
     public Job creditJob() {
-        return jobBuilderFactory.get("creditJob").incrementer(new RunIdIncrementer()).start(downloadFileStep())
-                .next(creditStep()).build();
+        return jobBuilderFactory.get("creditJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadFileStep())
+                .next(creditStep())
+                .build();
     }
 
     // <--------------------------- Person --------------------------------->
@@ -150,15 +164,26 @@ public class BatchConfig {
 
     @Bean
     public Step personStep() {
-        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1).reader(itemStreamReader())
-                .processor(personItemProcessor()).writer(personWriter()).faultTolerant().skipPolicy(new MySkipPolicy())
-                .listener(new PersonSkipListener()).listener(new personStepExecutionListener()).build();
+        return stepBuilderFactory.get("personStep")
+                .<Person, Person> chunk(1)
+                .reader(itemStreamReader())
+                .processor(personItemProcessor())
+                .writer(personWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new PersonSkipListener())
+                .listener(new MyStepExecutionListener())
+                .build();
     }
 
     @Bean
     public Job personJob() {
-        return jobBuilderFactory.get("personJob").incrementer(new RunIdIncrementer()).start(downloadFileStep())
-                .next(personStep()).listener(new JobResultListener()).build();
+        return jobBuilderFactory.get("personJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadFileStep())
+                .next(personStep())
+                .listener(new JobResultListener())
+                .build();
     }
 
     // <-------- Fim PersonStep com peek -------------->
