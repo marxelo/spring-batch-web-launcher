@@ -20,9 +20,11 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.job.DefaultJobParametersExtractor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
@@ -47,8 +49,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableScheduling
 public class BatchConfig {
 
-    static Resource[] resourceData = new Resource[] {
-            new ClassPathResource("data1.csv"),
+    static Resource[] resourceData = new Resource[] { new ClassPathResource("data1.csv"),
             new ClassPathResource("data2.csv") };
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfig.class);
@@ -67,20 +68,18 @@ public class BatchConfig {
 
     // @Bean
     // public BatchConfigurer configurer(BatchProperties properties,
-    //         @Qualifier("batchDataSource") DataSource dataSource) {
-    //     return new BasicBatchConfigurer(properties, null, null) {
-    //         @Override
-    //         public PlatformTransactionManager getTransactionManager() {
-    //             return transactionManager;
-    //         }
-    //     };
+    // @Qualifier("batchDataSource") DataSource dataSource) {
+    // return new BasicBatchConfigurer(properties, null, null) {
+    // @Override
+    // public PlatformTransactionManager getTransactionManager() {
+    // return transactionManager;
+    // }
+    // };
     // }
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
-        return new FlatFileItemReaderBuilder<String>()
-                .name("creditItemReader")
-                .lineMapper(new PassThroughLineMapper())
+        return new FlatFileItemReaderBuilder<String>().name("creditItemReader").lineMapper(new PassThroughLineMapper())
                 .build();
     }
 
@@ -110,14 +109,9 @@ public class BatchConfig {
 
     @Bean
     public Step creditStep() {
-        return stepBuilderFactory.get("creditStep").<String, String> chunk(1)
-                .reader(multiResourceItemReader())
-                .processor(creditItemProcessor())
-                .writer(itemWriter())
-                .faultTolerant()
-                .skipPolicy(new MySkipPolicy())
-                .listener(new MySkipListener())
-                .build();
+        return stepBuilderFactory.get("creditStep").<String, String> chunk(1).reader(multiResourceItemReader())
+                .processor(creditItemProcessor()).writer(itemWriter()).faultTolerant().skipPolicy(new MySkipPolicy())
+                .listener(new MySkipListener()).build();
     }
 
     @Bean
@@ -127,21 +121,16 @@ public class BatchConfig {
 
     @Bean
     public Step downloadFileStep() {
-        return stepBuilderFactory.get("downloadFileStep")
-                .tasklet(downloadFileTasklet())
-                .build();
+        return stepBuilderFactory.get("downloadFileStep").tasklet(downloadFileTasklet()).build();
     }
 
     @Bean
     public Job creditJob() {
-        return jobBuilderFactory.get("creditJob")
-                .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep())
-                .next(creditStep())
-                .build();
+        return jobBuilderFactory.get("creditJob").incrementer(new RunIdIncrementer()).start(downloadFileStep())
+                .next(creditStep()).build();
     }
 
-    //  <--------------------------- Person --------------------------------->
+    // <--------------------------- Person --------------------------------->
 
     public PersonItemProcessor personItemProcessor() {
         PersonItemProcessor processor = new PersonItemProcessor();
@@ -161,28 +150,59 @@ public class BatchConfig {
 
     @Bean
     public Step personStep() {
-        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1)
-                .reader(itemStreamReader())
-                .processor(personItemProcessor())
-                .writer(personWriter())
-                .faultTolerant()
-                .skipPolicy(new MySkipPolicy())
-                .listener(new PersonSkipListener())
-                .listener(new personStepExecutionListener())
-                .build();
+        return stepBuilderFactory.get("personStep").<Person, Person> chunk(1).reader(itemStreamReader())
+                .processor(personItemProcessor()).writer(personWriter()).faultTolerant().skipPolicy(new MySkipPolicy())
+                .listener(new PersonSkipListener()).listener(new personStepExecutionListener()).build();
     }
 
     @Bean
     public Job personJob() {
-        return jobBuilderFactory.get("personJob")
-                .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep())
-                .next(personStep())
-                .listener(new JobResultListener())
-                .build();
+        return jobBuilderFactory.get("personJob").incrementer(new RunIdIncrementer()).start(downloadFileStep())
+                .next(personStep()).listener(new JobResultListener()).build();
     }
 
     // <-------- Fim PersonStep com peek -------------->
+
+    @Bean
+    public Job jobStepJob() {
+        return this.jobBuilderFactory
+                .get("jobStepJob")
+                .start(jobStepJobStep1(null))
+                .next(jobStepJobStep2(null))
+                .build();
+    }
+
+    @Bean
+    public Step jobStepJobStep1(JobLauncher jobLauncher) {
+        return this.stepBuilderFactory
+                .get("jobStepJobStep1")
+                .job(personJob())
+                .launcher(jobLauncher)
+                .parametersExtractor(jobParametersExtractor())
+                .build();
+    }
+
+    @Bean
+    public Step jobStepJobStep2(JobLauncher jobLauncher) {
+        return this.stepBuilderFactory
+                .get("jobStepJobStep2")
+                .job(creditJob())
+                .launcher(jobLauncher)
+                .parametersExtractor(jobParametersExtractor())
+                .build();
+    }
+
+    @Bean
+    public DefaultJobParametersExtractor jobParametersExtractor() {
+        DefaultJobParametersExtractor extractor = new DefaultJobParametersExtractor();
+
+        // extractor.setKeys(new String[] { "input.file" });
+        extractor.setKeys(new String[] {});
+
+        return extractor;
+    }
+
+    // ------------------------------------------------
 
     @Bean(destroyMethod = "shutdown")
     public ThreadPoolTaskScheduler taskScheduler(@Value("${thread.pool.size}") int threadPoolSize) {

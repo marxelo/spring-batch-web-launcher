@@ -28,6 +28,9 @@ public class MyJobLauncher {
     @Autowired
     private Job creditJob;
 
+    @Autowired
+    private Job jobStepJob;
+
     private JobExecution execution;
 
     @Autowired
@@ -45,17 +48,21 @@ public class MyJobLauncher {
 
         try {
             if (jobName.equals("personJob")) {
-                execution = jobLauncher.run(personJob,
-                        new JobParametersBuilder()
-                                .addString("fileDate", fileDate)
-                                .addString("identifier", identifier)
-                                .toJobParameters());
+                execution = jobLauncher.run(personJob, new JobParametersBuilder()
+                        .addString("fileDate", fileDate)
+                        .addString("identifier", identifier)
+                        .toJobParameters());
+            }
+            if (jobName.equals("creditJob")) {
+                execution = jobLauncher.run(creditJob, new JobParametersBuilder()
+                        .addString("fileDate", fileDate)
+                        .addString("identifier", identifier)
+                        .toJobParameters());
             } else {
-                execution = jobLauncher.run(creditJob,
-                        new JobParametersBuilder()
-                                .addString("fileDate", fileDate)
-                                .addString("identifier", identifier)
-                                .toJobParameters());
+                execution = jobLauncher.run(jobStepJob, new JobParametersBuilder()
+                        .addString("fileDate", fileDate)
+                        .addString("identifier", identifier)
+                        .toJobParameters());
             }
             LOGGER.info("Job Started");
             jobStatus = execution.getStatus().toString();

@@ -100,8 +100,7 @@ public class JobController {
   }
 
   @GetMapping("/startJob")
-  public CustomJobExecution jer(
-      @RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
+  public CustomJobExecution jer(@RequestParam(value = "jobName", defaultValue = "creditJob") String jobName,
       @RequestParam(value = "fileDate") String fileDate,
       @RequestParam(value = "identifier", defaultValue = "0") String identifier) {
 
@@ -122,11 +121,12 @@ public class JobController {
   // as by default Spring maps unknown urls to "/**"
   public String notFound404() {
     return "redirect:job-manager";
-    // return new CustomJobExecution("Bad request. Informe no formato /startJob?jobName=xxxx&fileDate=YYYYMMdd");
+    // return new CustomJobExecution("Bad request. Informe no formato
+    // /startJob?jobName=xxxx&fileDate=YYYYMMdd");
   }
 
   public Boolean JobNameIsValid(String jobName) {
-    return (jobName.equals("creditJob") || jobName.equals("personJob"));
+    return (jobName.equals("creditJob") || jobName.equals("personJob") || jobName.equals("jobStepJob"));
   }
 
   public Boolean FileDateIsValid(String fileDate) {
