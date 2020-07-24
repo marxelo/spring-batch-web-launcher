@@ -1,6 +1,7 @@
 package com.marxelo.configuration;
 
 import javax.annotation.PreDestroy;
+import javax.sql.DataSource;
 
 import com.marxelo.models.dtos.Person;
 import com.marxelo.steps.CreditItemProcessor;
@@ -63,19 +64,23 @@ public class BatchConfig {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
-    // @Autowired
-    // private Person person;
+    @Autowired
+    private DataSource dataSource;
 
     // @Bean
     // public BatchConfigurer configurer(BatchProperties properties,
-    // @Qualifier("batchDataSource") DataSource dataSource) {
-    // return new BasicBatchConfigurer(properties, null, null) {
-    // @Override
-    // public PlatformTransactionManager getTransactionManager() {
-    // return transactionManager;
-    // }
-    // };
-    // }
+    //         @Qualifier("batchDataSource") DataSource dataSource) {
+    //     return new BasicBatchConfigurer(properties, dataSource, null) {
+    //         @Override
+    //         public PlatformTransactionManager getTransactionManager() {
+    //             return transactionManager;
+    //         }
+    //     };
+    // }    
+
+    // @Autowired
+    // private Person person;
+
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
