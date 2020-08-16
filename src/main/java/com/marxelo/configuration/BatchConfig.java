@@ -21,6 +21,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -80,7 +81,6 @@ public class BatchConfig {
 
     // @Autowired
     // private Person person;
-
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
@@ -151,7 +151,10 @@ public class BatchConfig {
 
     // <--------------------------- Person --------------------------------->
 
+    @StepScope
+    @Bean
     public PersonItemProcessor personItemProcessor() {
+        System.out.println("::::::::::::::::::: Before server is loaded :::::::::::::::::::::::");
         PersonItemProcessor processor = new PersonItemProcessor();
         return processor;
     }
@@ -167,7 +170,7 @@ public class BatchConfig {
         return new PersonItemReader();
     }
 
-    @Bean
+    // @Bean
     public Step personStep() {
         return stepBuilderFactory.get("personStep")
                 .<Person, Person> chunk(1)
