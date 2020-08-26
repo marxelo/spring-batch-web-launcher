@@ -1,4 +1,4 @@
-package com.marxelo.web;
+package com.marxelo.web.model;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

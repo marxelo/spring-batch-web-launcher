@@ -3,6 +3,8 @@ package com.marxelo.web;
 import java.util.Collection;
 import java.util.List;
 
+import com.marxelo.web.model.CustomJobExecution;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
