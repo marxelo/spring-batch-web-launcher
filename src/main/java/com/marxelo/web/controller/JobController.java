@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import com.marxelo.web.JobDetail;
 import com.marxelo.web.MyJobLauncher;
 import com.marxelo.web.model.CustomJobExecution;
+import com.marxelo.web.model.Usuario;
 
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
@@ -38,6 +39,14 @@ public class JobController {
     model.addAttribute("customJobExecution", new CustomJobExecution());
     return "request";
   }
+
+  @GetMapping("/login")
+  public String loginForm(Model model) {
+
+    model.addAttribute("user", new Usuario());
+    return "login";
+  }
+
 
   @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=submit")
   public String submitJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
@@ -124,7 +133,7 @@ public class JobController {
     return new CustomJobExecution(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }
 
-  @GetMapping({ "", "/", "/**", "index", "index.html" })
+  @GetMapping({ "", "/", "/xx", "index", "index.html" })
   // as by default Spring maps unknown urls to "/**"
   public String notFound404() {
     return "redirect:job-manager";
