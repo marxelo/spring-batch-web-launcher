@@ -5,8 +5,8 @@
             <title>Suite Cartão - Login</title>
             <meta charset="UTF-8"/>
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <!--    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}"/> 
-            <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}"/> -->
+        <!--    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}"/> -->
+            <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}"/> 
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
         </head>
 
@@ -16,7 +16,7 @@
                 <div class="container">
                     <div class="navbar-header">
                         <a class="navbar-brand" th:href="@{/}">
-                            <img th:src="@{/static/img/logo.png}" alt="cartão logo"/>
+                            <img th:src="@{/img/logo.png}" alt="cartão logo"/>
                         </a>
                     </div>
                     <div id="navbar" class="collapse navbar-collapse">
@@ -33,16 +33,16 @@
 
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3">
-                        <h1>Página de Login</h1>
+                        <h4>Login</h4>
                         <form action="/authenticate" method="post"><input type="hidden" name="_csrf" value="6f7e80cb-f74d-41a2-b1a3-7c695f13525a"/>
 
                             <div class="form-group">
-                                <label for="username">Usuário</label>:
-                                <input type="text" id="username" name="username" class="form-control" autofocus="autofocus" placeholder="Username">
+                                <label for="username">Usuário:</label>
+                                <input type="text" id="username" name="username" class="form-control" autofocus="autofocus" placeholder="Usuário">
                             </div>
                             <div class="form-group">
-                                <label for="password">Senha</label>:
-                                <input type="password" id="password" name="password" class="form-control" placeholder="Password">
+                                <label for="password">Senha:</label>
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Senha">
                             </div>
                             <div class="form-group">
                                 <div class="row">
