@@ -27,7 +27,7 @@ GET http://localhost:8080/startJob?jobName={{jobName}}&fileDate={{fileDate}}&tim
 
 ### Test personJob - 
 
-GET http://localhost:8080/startJob
+GET http://localhost:8090/startJob
 ?jobName=personJob
 &fileDate=20200412
 &time=001522
@@ -35,3 +35,21 @@ GET http://localhost:8080/startJob
 
 ### Teste upload.html
 http://localhost:8080/upload
+
+### Teste jobExection-request
+PUT  http://localhost:8090/job/execution-request HTTP/1.1
+content-type: application/json
+
+{
+    "jobName": "MARsELO",
+    "jobParms": [
+        {
+            "parmName":"fileDate",
+            "parmValue":"20200905"
+        },
+        {
+            "parmName":"identifier",
+            "parmValue":"0"
+        }
+    ]
+}
