@@ -8,6 +8,7 @@ import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 public class JobController {
@@ -124,10 +126,60 @@ public class JobController {
   }
 
   @PutMapping("/job/execution-request")
-  public ResponseEntity<JobExecutionRequest> startJob(@Valid @RequestBody JobExecutionRequest jobExecutionRequest) {
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public ResponseEntity<Void> startJob(@Valid @RequestBody JobExecutionRequest jobExecutionRequest) {
 
     System.out.println(jobExecutionRequest);
-    return ResponseEntity.ok(jobExecutionRequest);
+
+    if (!JobNameIsValid(jobExecutionRequest.getJobName())) {
+      System.out.println("local: 1.0");
+      return ResponseEntity.badRequest().build();
+    }
+
+    if (jobExecutionRequest.getJobParms().isEmpty()) {
+      System.out.println("local: 2.0");
+      return ResponseEntity.badRequest().build();
+    }
+
+    if (!jobExecutionRequest.getJobParms().get(0).getParmName().equals("fileDate")) {
+      System.out.println("local: 3.0");
+      return ResponseEntity.badRequest().build();
+    }
+
+    if (!FileDateIsValid(jobExecutionRequest.getJobParms().get(0).getParmValue())) {
+      System.out.println("local: 4.0");
+      return ResponseEntity.badRequest().build();
+    }
+
+    if (!jobExecutionRequest.getJobParms().get(1).getParmName().equals("identifier")) {
+      System.out.println("local: 5.0");
+      return ResponseEntity.badRequest().build();
+    }
+
+    if (!isValidIdentifier(jobExecutionRequest.getJobParms().get(1).getParmValue())) {
+      System.out.println("local: 6.0");
+      return ResponseEntity.badRequest().build();
+    }
+    System.out.println("local: 7.0");
+    String jobName = jobExecutionRequest.getJobName();
+    System.out.println("local: 7.1");
+    String fileDate = jobExecutionRequest.getJobParms().get(0).getParmValue();
+    System.out.println("local: 7.2");
+    String identifier = jobExecutionRequest.getJobParms().get(1).getParmValue();
+    System.out.println("local: 7.3");
+
+    CustomJobExecution cje = myJobLauncher.run(jobName, fileDate, identifier);
+    System.out.println("local: 8.0");
+    LOGGER.info(cje.getJobStatus());
+    // customJobExecution.setJobStatus(cje.getJobStatus());
+    // customJobExecution.setMessage(cje.getMessage());
+
+    if (cje.getMessage() != null) {
+      System.out.println(cje.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
+    System.out.println("local: 10.0");
+    return ResponseEntity.accepted().build();
   }
 
   @GetMapping({ "", "/", "/**", "index", "index.html" })
@@ -146,4 +198,13 @@ public class JobController {
     return (GenericValidator.isDate(fileDate, "yyyyMMdd", true));
   }
 
+  public Boolean isValidIdentifier(String identifier) {
+    try {
+      return (Integer.parseInt(identifier) >= 0 && Integer.parseInt(identifier) <= 100);
+    } catch (NumberFormatException e) {
+      return false;
+    } catch (NullPointerException e) {
+      return false;
+    }
+  }
 }

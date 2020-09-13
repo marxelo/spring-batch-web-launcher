@@ -37,11 +37,11 @@ GET http://localhost:8090/startJob
 http://localhost:8080/upload
 
 ### Teste jobExection-request
-PUT  http://localhost:8090/job/execution-request HTTP/1.1
+PUT http://localhost:8090/job/execution-request HTTP/1.1
 content-type: application/json
 
 {
-    "jobName": "MARsELO",
+    "jobName": "jobStepJob",
     "jobParms": [
         {
             "parmName":"fileDate",
@@ -49,7 +49,25 @@ content-type: application/json
         },
         {
             "parmName":"identifier",
-            "parmValue":"0"
+            "parmValue":"15"
+        }
+    ]
+}
+
+### Teste jobExection-request - test
+PUT http://localhost:8090/job/execution-request HTTP/1.1
+content-type: application/json
+
+{
+    "jobName": "jobStepJob",
+    "jobParams": [
+        {
+            "name":"fileDate",
+            "value":"20200905"
+        },
+        {
+            "name":"identifier",
+            "value":"14"
         }
     ]
 }
