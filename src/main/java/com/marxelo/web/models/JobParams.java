@@ -11,8 +11,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class JobParm {
-    private String parmName;
-    private String parmValue;   
+public class JobParams {
+    private String name;
+    private String value;   
     
 }

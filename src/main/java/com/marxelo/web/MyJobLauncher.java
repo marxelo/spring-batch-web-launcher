@@ -41,21 +41,17 @@ public class MyJobLauncher {
     }
 
     public CustomJobExecution run(String jobName, String fileDate, String identifier) {
-        System.out.println("local: 2.1.0");
+
         StringBuilder errorMessage = new StringBuilder();
         String msg = null;
         String jobStatus;
-        System.out.println("local: 2.2.0");
 
         try {
-            System.out.println("local: 2.3.0");
             if (jobName.equals("personJob")) {
-                System.out.println("local: 2.4.0");
                 execution = jobLauncher.run(personJob, new JobParametersBuilder()
                         .addString("fileDate", fileDate)
                         .addString("identifier", identifier)
                         .toJobParameters());
-                System.out.println("local: 2.5.0");
             }
             if (jobName.equals("creditJob")) {
                 execution = jobLauncher.run(creditJob, new JobParametersBuilder()
@@ -69,11 +65,8 @@ public class MyJobLauncher {
                         .toJobParameters());
             }
             LOGGER.info("Job Started");
-            System.out.println("local: 2.6.0");
             jobStatus = execution.getStatus().toString();
-            System.out.println("local: 2.7.0");
         } catch (Exception e) {
-            System.out.println("local: 2.8.0");
             errorMessage.append("Erro ao executar job. ");
             if (e.getMessage() != null) {
                 errorMessage.append("Message: " + e.getMessage() + " ");
@@ -89,22 +82,13 @@ public class MyJobLauncher {
                 errorMessage.append("Exception " + e.getClass() + " ");
             }
             msg = errorMessage.toString();
-            System.out.println("local: 2.9.0");
 
-            if (e instanceof JobInstanceAlreadyCompleteException) {
-                System.out.println("local: 2.10.0");
-                System.out.println("msg: " + msg);
-                jobStatus = "COMPLETED";
-            } else if (e instanceof JobExecutionAlreadyRunningException) {
-                System.out.println("local: 2.10.0");
-                System.out.println("msg: " + msg);
+            if ((e instanceof JobInstanceAlreadyCompleteException || e instanceof JobExecutionAlreadyRunningException) && execution != null ){
                 jobStatus = execution.getStatus().toString();
             } else {
-                System.out.println("local: 2.11.0");
                 jobStatus = "FAILED";
             }
         }
-        System.out.println("local: 2.12.0");
         return new CustomJobExecution(jobStatus, msg);
     }
 

@@ -15,6 +15,6 @@ import lombok.ToString;
 @ToString
 public class JobExecutionRequest {
     private String jobName;
-    private List<JobParm> jobParms;
+    private List<JobParams> jobParams;
     
 }
