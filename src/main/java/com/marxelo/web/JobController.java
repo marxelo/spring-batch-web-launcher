@@ -1,6 +1,6 @@
 package com.marxelo.web;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
@@ -69,7 +69,6 @@ public class JobController {
 
   @RequestMapping(value = "/job-manager", method = RequestMethod.POST, params = "action=detail")
   public String detailJob(@Valid CustomJobExecution customJobExecution, BindingResult bindingResult, Model mode) {
-
     String fileDate = customJobExecution.getFileDate().replaceAll("[^0-9]", "");
     String jobName = customJobExecution.getJobName();
     String identifier = customJobExecution.getIdentifier() + "";

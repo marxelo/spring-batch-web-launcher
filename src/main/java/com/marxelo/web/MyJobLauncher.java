@@ -83,7 +83,7 @@ public class MyJobLauncher {
             }
             msg = errorMessage.toString();
 
-            if (e instanceof JobInstanceAlreadyCompleteException || e instanceof JobExecutionAlreadyRunningException) {
+            if ((e instanceof JobInstanceAlreadyCompleteException || e instanceof JobExecutionAlreadyRunningException) && execution != null ){
                 jobStatus = execution.getStatus().toString();
             } else {
                 jobStatus = "FAILED";

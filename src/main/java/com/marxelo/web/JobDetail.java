@@ -29,37 +29,50 @@ public class JobDetail {
         jpb.addString("fileDate", fileDate);
         jpb.addString("identifier", identifier);
         JobParameters jobParameters = jpb.toJobParameters();
+        JobParameters jobParameters2 = new JobParametersBuilder()
+                .addString("identifier", identifier)
+                .addString("fileDate", fileDate)
+                .toJobParameters();
         int JOB_INSTANCE_COUNT = 30;
 
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, JOB_INSTANCE_COUNT);
 
         instanceForLoop: for (JobInstance jobInstance : jobInstances) {
+            try {
+                List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
 
-            List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
+                for (JobExecution jobExecution : jobExecutions) {
+                    if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())
+                            || jobExecution.getJobParameters().toString().equals(jobParameters2.toString())) {
+                        cje.setJobStatus(jobExecution.getStatus().toString());
+                        cje.setJobExecutionDetail(jobExecution.toString());
+                        if (jobExecution.getStatus().toString().equals("FAILED")) {
+                            cje.setMessage(jobExecution.getExitStatus().getExitDescription());
+                        }
 
-            for (JobExecution jobExecution : jobExecutions) {
+                        Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
+                        for (StepExecution stepExecution : stepExecutions) {
+                            if ((stepExecution.getStepName().equals("personStep"))
+                                    || (stepExecution.getStepName().equals("creditStep"))) {
 
-                if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())) {
-                    cje.setJobStatus(jobExecution.getStatus().toString());
-                    cje.setJobExecutionDetail(jobExecution.toString());
-                    if (jobExecution.getStatus().toString().equals("FAILED")) {
-                        cje.setMessage(jobExecution.getExitStatus().getExitDescription());
-                    }
-
-                    Collection<StepExecution> stepExecutions = jobExecution.getStepExecutions();
-                    for (StepExecution stepExecution : stepExecutions) {
-
-                        if ((stepExecution.getStepName().equals("personStep"))
-                                || (stepExecution.getStepName().equals("creditStep"))) {
-
-                            cje.setStepExecutionDetail(stepExecution.toString());
-                            break instanceForLoop;
+                                cje.setStepExecutionDetail(stepExecution.toString());
+                                break instanceForLoop;
+                            }
                         }
                     }
+
                 }
+            } catch (IllegalArgumentException e) {
+                cje.setJobStatus("UNKOWN");
+                if (e.getCause().toString().contains("com.fasterxml.jackson.databind.exc.InvalidTypeIdException")) {
+                    cje.setMessage(
+                            "Job executado em versão anterior do Spring Batch. Não é possível recuperar dados da execução.");
+                } else {
+                    cje.setMessage("Erro ao recuperar dados da execução. " + e.getCause());
+                }
+                break instanceForLoop;
             }
         }
-
         if (cje.getJobStatus() == null) {
             cje.setMessage("No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
             LOGGER.info(cje.toString());
