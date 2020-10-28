@@ -237,17 +237,17 @@ public class BatchConfig {
 
     // ------------------------------------------------
 
-    @Bean(destroyMethod = "shutdown")
-    public ThreadPoolTaskScheduler taskScheduler(@Value("${thread.pool.size}") int threadPoolSize) {
-        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        threadPoolTaskScheduler.setPoolSize(threadPoolSize);
-        return threadPoolTaskScheduler;
-    }
+    // @Bean(destroyMethod = "shutdown")
+    // public ThreadPoolTaskScheduler taskScheduler(@Value("${thread.pool.size}") int threadPoolSize) {
+    //     ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+    //     threadPoolTaskScheduler.setPoolSize(threadPoolSize);
+    //     return threadPoolTaskScheduler;
+    // }
 
-    @PreDestroy
-    private void preDestroy() {
-        LOGGER.info("Called onApplicationEvent().");
-    }
+    // @PreDestroy
+    // private void preDestroy() {
+    //     LOGGER.info("Called onApplicationEvent().");
+    // }
 
     @Autowired
     private JobRepository jobRepository;

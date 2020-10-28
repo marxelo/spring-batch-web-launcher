@@ -48,17 +48,19 @@ public class MyJobLauncher {
 
         try {
             if (jobName.equals("personJob")) {
+                System.out.println("=== personjob");
                 execution = jobLauncher.run(personJob, new JobParametersBuilder()
                         .addString("fileDate", fileDate)
                         .addString("identifier", identifier)
                         .toJobParameters());
-            }
-            if (jobName.equals("creditJob")) {
+            } else if (jobName.equals("creditJob")) {
+                System.out.println("=== creditjob");
                 execution = jobLauncher.run(creditJob, new JobParametersBuilder()
                         .addString("fileDate", fileDate)
                         .addString("identifier", identifier)
                         .toJobParameters());
             } else {
+                System.out.println("=== jobStepjob");
                 execution = jobLauncher.run(jobStepJob, new JobParametersBuilder()
                         .addString("fileDate", fileDate)
                         .addString("identifier", identifier)
