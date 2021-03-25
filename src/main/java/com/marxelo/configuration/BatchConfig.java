@@ -68,6 +68,8 @@ public class BatchConfig {
     @Autowired
     private DataSource dataSource;
 
+    private JobLauncher jobLauncher;
+
     // @Bean
     // public BatchConfigurer configurer(BatchProperties properties,
     //         @Qualifier("batchDataSource") DataSource dataSource) {
@@ -200,8 +202,8 @@ public class BatchConfig {
     public Job jobStepJob() {
         return this.jobBuilderFactory
                 .get("jobStepJob")
-                .start(jobStepJobStep1(null))
-                .next(jobStepJobStep2(null))
+                .start(jobStepJobStep1(jobLauncher))
+                .next(jobStepJobStep2(jobLauncher))
                 .build();
     }
 

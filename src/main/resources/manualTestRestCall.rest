@@ -68,6 +68,10 @@ content-type: application/json
         {
             "name":"identifier",
             "value":"14"
+        }        ,
+        {
+            "name":"restartFlag",
+            "value":"S"
         }
     ]
 }
