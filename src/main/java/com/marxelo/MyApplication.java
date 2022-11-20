@@ -36,7 +36,7 @@ public class MyApplication {
         try {
             Thread.sleep(15L);
             System.out.println("\n");
-            log.info("Ready And Alive \\o/. Let's go baby!");
+            log.info("Ready and Alive \\o/. Let's goooooo baby!\n");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

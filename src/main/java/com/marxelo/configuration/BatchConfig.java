@@ -121,8 +121,23 @@ public class BatchConfig {
 
 
     @Bean
-    public Step creditStep() {
-        return stepBuilderFactory.get("creditStep")
+    public Step creditMainStep() {
+        return stepBuilderFactory.get("creditMainStep")
+                .<String, String>chunk(1)
+                .reader(multiResourceItemReader())
+                .processor(creditItemProcessor())
+                .writer(itemWriter())
+                .faultTolerant()
+                .skipPolicy(new MySkipPolicy())
+                .listener(new MySkipListener())
+                .listener(new MyStepExecutionListener())
+                .build();
+    }
+
+
+    @Bean
+    public Step debitMainStep() {
+        return stepBuilderFactory.get("debitMainStep")
                 .<String, String>chunk(1)
                 .reader(multiResourceItemReader())
                 .processor(creditItemProcessor())
@@ -136,18 +151,27 @@ public class BatchConfig {
 
     @Bean
     public Step downloadCreditFileStep() {
-        return stepBuilderFactory.get("downloadCreditFileStep")
+        return stepBuilderFactory.get("downloadDebitFileStep")
                 .listener(new DownloadCreditFileTaskletListener())
                 .tasklet(new DownloadCreditFileTasklet())
                 .build();
     }
 
     @Bean
+    public Step downloadDebitFileStep() {
+        return stepBuilderFactory.get("downloadCreditFileStep")
+                .listener(new DownloadCreditFileTaskletListener())
+                .tasklet(new DownloadCreditFileTasklet())
+                .build();
+    }
+
+
+    @Bean
     public Job creditJob() {
         return jobBuilderFactory.get("creditJob")
                 .incrementer(new RunIdIncrementer())
                 .start(downloadCreditFileStep())
-                .next(creditStep())
+                .next(creditMainStep())
                 .listener(new JobResultListener())
                 .build();
     }
@@ -155,8 +179,8 @@ public class BatchConfig {
     public Job debitJob() {
         return jobBuilderFactory.get("debitJob")
                 .incrementer(new RunIdIncrementer())
-                .start(downloadCreditFileStep())
-                .next(creditStep())
+                .start(downloadDebitFileStep())
+                .next(debitMainStep())
                 .listener(new JobResultListener())
                 .build();
     }
@@ -239,19 +263,20 @@ public class BatchConfig {
     // <-------- Fim PersonStep com peek -------------->
 
     @Bean
-    public Job principalJob() {
+    public Job parentJob() {
         return this.jobBuilderFactory
-                .get("principalJob")
-                .start(jobStepJobStep1(null))
-                .next(jobStepJobStep2(null))
+                .get("parentJob")
+                .start(personJobStep(null))
+                .on("*").to(creditJobStep(null))
+                .next(debitJobStep(null)).end()
                 .listener(new JobResultListener())
                 .build();
     }
 
     @Bean
-    public Step jobStepJobStep1(JobLauncher jobLauncher) {
+    public Step personJobStep(JobLauncher jobLauncher) {
         return this.stepBuilderFactory
-                .get("jobStepJobStep1")
+                .get("personJobStep")
                 .job(personJob())
                 .launcher(jobLauncher)
                 .parametersExtractor(jobParametersExtractor())
@@ -259,10 +284,20 @@ public class BatchConfig {
     }
 
     @Bean
-    public Step jobStepJobStep2(JobLauncher jobLauncher) {
+    public Step creditJobStep(JobLauncher jobLauncher) {
         return this.stepBuilderFactory
-                .get("jobStepJobStep2")
+                .get("creditJobStep")
                 .job(creditJob())
+                .launcher(jobLauncher)
+                .parametersExtractor(jobParametersExtractor())
+                .build();
+    }
+
+    @Bean
+    public Step debitJobStep(JobLauncher jobLauncher) {
+        return this.stepBuilderFactory
+                .get("debitJobStep")
+                .job(debitJob())
                 .launcher(jobLauncher)
                 .parametersExtractor(jobParametersExtractor())
                 .build();

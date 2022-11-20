@@ -17,7 +17,7 @@ public class DownloadCreditFileTaskletListener implements StepExecutionListener 
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        log.info("StepListener - called AFTER step" + stepExecution.getStepName());
+        log.info("StepListener - called AFTER step " + stepExecution.getStepName());
         return ExitStatus.COMPLETED;
 
     }

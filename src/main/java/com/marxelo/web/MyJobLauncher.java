@@ -36,7 +36,7 @@ public class MyJobLauncher {
     private Job debitJob;
 
     @Autowired
-    private Job principalJob;
+    private Job parentJob;
 
     private JobExecution execution;
 
@@ -80,33 +80,14 @@ public class MyJobLauncher {
                             .toJobParameters());
                     break;
                 default:
-                    execution = jobLauncher.run(principalJob, new JobParametersBuilder()
+                    execution = jobLauncher.run(parentJob, new JobParametersBuilder()
                             .addString("fileDate", fileDate)
                             .addString("identifier", identifier)
                             .toJobParameters());
                     break;
             }
-/*
-            if (jobName.equals("personJob")) {
-                execution = jobLauncher.run(personJob, new JobParametersBuilder()
-                        .addString("fileDate", fileDate)
-                        .addString("identifier", identifier)
-                        .toJobParameters());
-            } else {
-                if (jobName.equals("creditJob")) {
-                    execution = jobLauncher.run(creditJob, new JobParametersBuilder()
-                            .addString("fileDate", fileDate)
-                            .addString("identifier", identifier)
-                            .toJobParameters());
-                } else {
-                    execution = jobLauncher.run(principalJob, new JobParametersBuilder()
-                            .addString("fileDate", fileDate)
-                            .addString("identifier", identifier)
-                            .toJobParameters());
-                }
-            }
-  */
-            log.info("Launching job" + jobName);
+
+            log.info("Launching job " + jobName);
             jobStatus = execution.getStatus().toString();
         } catch (Exception e) {
             errorMessage.append("Erro ao executar job. ");

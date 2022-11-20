@@ -43,7 +43,7 @@ public class JobResultListener implements JobExecutionListener {
     log.info("jobParameters: " + gson.toJson(jobExecution.getJobParameters()));
 
     for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-      log.info(gson.toJson(new StepExecutionSummary(stepExecution)) + ",");
+      log.info(stepExecution.getStepName() + ": " + gson.toJson(new StepExecutionSummary(stepExecution)) + ",");
     }
 
     if (!jobExecution.getExitStatus().getExitCode().equals("COMPLETED")) {

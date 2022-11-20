@@ -126,7 +126,7 @@ public class JobController {
 
   public Boolean JobNameIsValid(String jobName) {
     return (jobName.equals("creditJob") || jobName.equals("debitJob") || jobName.equals("personJob")
-        || jobName.equals("slimPersonJob") || jobName.equals("principalJob"));
+        || jobName.equals("slimPersonJob") || jobName.equals("parentJob"));
   }
 
   public Boolean FileDateIsValid(String fileDate) {
