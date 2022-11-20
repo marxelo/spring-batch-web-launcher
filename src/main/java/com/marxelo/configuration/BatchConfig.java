@@ -213,8 +213,8 @@ public class BatchConfig {
     }
 
     @Bean
-    public Step personStep() {
-        return stepBuilderFactory.get("personStep")
+    public Step personMainStep() {
+        return stepBuilderFactory.get("personMainStep")
                 .<Person, Person>chunk(1)
                 .reader(itemStreamReader())
                 .processor(personItemProcessor())
@@ -240,7 +240,7 @@ public class BatchConfig {
                 .start(downloadPersonFileStep())
                 .on("FILENOTFOUND").to(personJobWeekendStep())
                 .from(downloadPersonFileStep())
-                .on("COMPLETED").to(personStep())
+                .on("COMPLETED").to(personMainStep())
                 .end()
                 .listener(new JobResultListener())                
                 .build();
@@ -251,7 +251,7 @@ public class BatchConfig {
         return jobBuilderFactory.get("slimPersonJob")
                 .incrementer(new RunIdIncrementer())
                 .start(downloadPersonFileStep())
-                   .on("COMPLETED").to(personStep())
+                   .on("COMPLETED").to(personMainStep())
                 .from(downloadPersonFileStep())
                    .on("FILENOTFOUND")
                    .end()                
@@ -260,15 +260,19 @@ public class BatchConfig {
                 .build();
     }
 
-    // <-------- Fim PersonStep com peek -------------->
+    // <----------------- -------------->
 
     @Bean
     public Job parentJob() {
         return this.jobBuilderFactory
                 .get("parentJob")
                 .start(personJobStep(null))
-                .on("*").to(creditJobStep(null))
-                .next(debitJobStep(null)).end()
+                   .on("*").to(creditJobStep(null))
+                .from(creditJobStep(null))
+                   .on("*").to(debitJobStep(null))
+                .from(debitJobStep(null))
+                   .on("*").end()
+                .end()
                 .listener(new JobResultListener())
                 .build();
     }
