@@ -39,7 +39,8 @@ public class JobDetail {
 
             for (JobExecution jobExecution : jobExecutions) {
 
-                if (jobExecution.getJobParameters().toString().equals(jobParameters.toString())) {
+                if (parameterValuesMatch(fileDate, identifier, jobExecution)) {
+
                     cje.setJobStatus(jobExecution.getStatus().toString());
                     cje.setJobExecutionDetail(jobExecution.toString());
                     if (jobExecution.getStatus().toString().equals("FAILED")) {
@@ -50,7 +51,8 @@ public class JobDetail {
                     for (StepExecution stepExecution : stepExecutions) {
 
                         if ((stepExecution.getStepName().equals("personStep"))
-                                || (stepExecution.getStepName().equals("creditStep"))) {
+                                || (stepExecution.getStepName().equals("creditStep"))
+                                || (stepExecution.getStepName().equals("debitStep"))) {
 
                             cje.setStepExecutionDetail(stepExecution.toString());
                             break instanceForLoop;
@@ -61,10 +63,18 @@ public class JobDetail {
         }
 
         if (cje.getJobStatus() == null) {
-            cje.setMessage("No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
+            cje.setMessage(
+                    "No information found for job {" + jobName + "} with parameters " + jobParameters.toString());
             LOGGER.info(cje.toString());
         }
 
         return cje;
+    }
+
+    private boolean parameterValuesMatch(String fileDate, String identifier, JobExecution jobExecution) {
+
+        return jobExecution.getJobParameters().getString("fileDate", "00010101").equals(fileDate)
+                && jobExecution.getJobParameters().getString("identifier", "null").equals(identifier);
+
     }
 }

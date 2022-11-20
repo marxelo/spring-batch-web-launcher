@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "thread.pool.size",
+  "type": "java.lang.String",
+  "description": "A description for 'thread.pool.size'"
+}]}

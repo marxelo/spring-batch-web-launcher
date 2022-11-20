@@ -1,27 +1,26 @@
 package com.marxelo.steps;
 
-import com.marxelo.models.dtos.Person;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import com.marxelo.models.dtos.Person;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class PersonItemProcessor implements ItemProcessor<Person, Person> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PersonItemProcessor.class);
 
     @Nullable
     @Override
-    public Person process(final Person person) throws Exception {
-        LOGGER.debug("Processing item: " + person.toString());
-        System.out.println("Processing item: " + person.toString());
-        // Aguardar o último envio de métrica
+    public Person process(final @NonNull Person person) throws Exception {
+        log.debug("Processing item: " + person.toString());
+        // Simula tempo de processamento por item
         try {
-            Thread.sleep(2500L);
-            LOGGER.info("awake");
+            Thread.sleep(250L);
+            // log.info("awake");
         } catch (InterruptedException e) {
-
             e.printStackTrace();
         }
         return person;

@@ -3,14 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Cálculo de Receita de Intercâmbio Mastercard</title>
+    <title>Playing With Spring Batch</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-static-top">
-        <span class="navbar-brand mb-0 h1">Cálculo da Receita de Intercâmbio</span>
+        <span class="navbar-brand mb-0 h1">Playing With Spring Batch</span>
     </nav>
 
     <div class="container my-3">
@@ -23,9 +23,10 @@
                         <select class="form-control" th:field="*{jobName}">
                             <option value="">Selecione...</option>
                             <option value="creditJob">creditJob</option>
-                            <option value="personJob">personJob</option>
                             <option value="debitJob">debitJob</option>
-                            <option value="jobStepJob">jobStepJob</option>
+                            <option value="personJob">personJob</option>
+                            <option value="slimPersonJob">slimPersonJob</option>
+                            <option value="principalJob">principalJob</option>
                         </select>
                         <span th:if="${#fields.hasErrors('jobName')}" class="help-block" th:errors="*{jobName}" th:style="${'color: red;'}"></span>
                     </div>

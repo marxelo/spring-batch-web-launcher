@@ -1,21 +1,22 @@
 package com.marxelo.steps.tasklets;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 
-public class DownloadFileTasklet implements Tasklet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadFileTasklet.class);
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class PersonJobWeekendTasklet implements Tasklet {
+    
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext)
             throws Exception {
-        String fileDate = (String) chunkContext.getStepContext().getJobParameters().get("fileDate");
-        LOGGER.info("File Date in tasklet............: " + fileDate);
-        System.out.println("File Date in tasklet............: " + fileDate);
+
+        log.warn("File not found. Today is a Saturday. Job will not fail!");
+        
         return RepeatStatus.FINISHED;
     }
 }

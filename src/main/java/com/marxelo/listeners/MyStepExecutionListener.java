@@ -1,23 +1,23 @@
-package com.marxelo.steps;
+package com.marxelo.listeners;
 
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MyStepExecutionListener implements StepExecutionListener {
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        System.out.println("Called beforeStep().");
-        JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
-        System.out.println(parameters.toString());
+       log.info("Called BEFORE step " + stepExecution.getStepName());
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        System.out.println("Called afterStep().");
-        System.out.println("Step Summary: " + stepExecution.getSummary());
+        log.info("Called AFTER step " + stepExecution.getStepName());
+        log.info(stepExecution.getStepName() + " Summary: " + stepExecution.getSummary());
         return ExitStatus.COMPLETED;
     }
 }

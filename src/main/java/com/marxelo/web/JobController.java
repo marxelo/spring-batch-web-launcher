@@ -3,8 +3,6 @@ package com.marxelo.web;
 import javax.validation.Valid;
 
 import org.apache.commons.validator.GenericValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Controller
-public class JobController {
+import lombok.extern.slf4j.Slf4j;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
+@Controller
+@Slf4j
+public class JobController {
 
   @Autowired
   MyJobLauncher myJobLauncher;
@@ -45,7 +44,7 @@ public class JobController {
     }
 
     if (!JobNameIsValid(jobName)) {
-      customJobExecution.setMessage("JobName não informado");
+      customJobExecution.setMessage("JobName não informado ou inválido");
       return "request";
     }
 
@@ -55,7 +54,7 @@ public class JobController {
     }
 
     CustomJobExecution cje = myJobLauncher.run(jobName, fileDate, identifier);
-    LOGGER.info(cje.getJobStatus());
+    log.info("Job Status " + cje.getJobStatus());
     customJobExecution.setJobStatus(cje.getJobStatus());
     customJobExecution.setMessage(cje.getMessage());
 
@@ -90,7 +89,7 @@ public class JobController {
     }
 
     CustomJobExecution cje = jobDetail.getJobDetail(jobName, fileDate, identifier);
-    LOGGER.info(cje.getJobStatus());
+    log.info("Job Status " + cje.getJobStatus());
     customJobExecution.setJobStatus(cje.getJobStatus());
     customJobExecution.setMessage(cje.getMessage());
     customJobExecution.setJobExecutionDetail(cje.getJobExecutionDetail());
@@ -113,7 +112,7 @@ public class JobController {
     }
 
     CustomJobExecution ere = myJobLauncher.run(jobName, fileDate, identifier);
-    LOGGER.info(ere.getJobStatus());
+    log.info("Job Status " + ere.getJobStatus());
     return new CustomJobExecution(jobName, fileDate, ere.getJobStatus(), ere.getMessage());
   }
 
@@ -126,7 +125,8 @@ public class JobController {
   }
 
   public Boolean JobNameIsValid(String jobName) {
-    return (jobName.equals("creditJob") || jobName.equals("personJob") || jobName.equals("jobStepJob"));
+    return (jobName.equals("creditJob") || jobName.equals("debitJob") || jobName.equals("personJob")
+        || jobName.equals("slimPersonJob") || jobName.equals("principalJob"));
   }
 
   public Boolean FileDateIsValid(String fileDate) {

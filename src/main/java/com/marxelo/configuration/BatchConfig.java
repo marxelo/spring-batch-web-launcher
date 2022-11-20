@@ -2,17 +2,6 @@ package com.marxelo.configuration;
 
 import javax.annotation.PreDestroy;
 
-import com.marxelo.models.dtos.Person;
-import com.marxelo.steps.CreditItemProcessor;
-import com.marxelo.steps.MyStepExecutionListener;
-import com.marxelo.steps.PersonItemProcessor;
-import com.marxelo.steps.PersonItemReader;
-import com.marxelo.steps.PersonItemWriter;
-import com.marxelo.steps.skippers.MySkipListener;
-import com.marxelo.steps.skippers.MySkipPolicy;
-import com.marxelo.steps.skippers.PersonSkipListener;
-import com.marxelo.steps.tasklets.DownloadFileTasklet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -44,6 +33,22 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.marxelo.listeners.JobResultListener;
+import com.marxelo.listeners.MyStepExecutionListener;
+import com.marxelo.listeners.DownloadCreditFileTaskletListener;
+// import com.marxelo.listeners.DownloadPersonFileTaskletListener;
+import com.marxelo.models.dtos.Person;
+import com.marxelo.steps.CreditItemProcessor;
+import com.marxelo.steps.PersonItemProcessor;
+import com.marxelo.steps.PersonItemReader;
+import com.marxelo.steps.PersonItemWriter;
+import com.marxelo.steps.skippers.MySkipListener;
+import com.marxelo.steps.skippers.MySkipPolicy;
+import com.marxelo.steps.skippers.PersonSkipListener;
+import com.marxelo.steps.tasklets.DownloadCreditFileTasklet;
+import com.marxelo.steps.tasklets.DownloadPersonFileTasklet;
+import com.marxelo.steps.tasklets.PersonJobWeekendTasklet;
+
 @Configuration
 @EnableBatchProcessing
 @EnableScheduling
@@ -64,6 +69,9 @@ public class BatchConfig {
     private StepBuilderFactory stepBuilderFactory;
 
     // @Autowired
+    // private DataSource dataSource;
+
+    // @Autowired
     // private Person person;
 
     // @Bean
@@ -76,6 +84,8 @@ public class BatchConfig {
     // }
     // };
     // }
+
+    // <-------- Credit Job Configuration ----------------->
 
     @Bean
     public FlatFileItemReader<String> itemReader() {
@@ -109,10 +119,11 @@ public class BatchConfig {
         };
     }
 
+
     @Bean
     public Step creditStep() {
         return stepBuilderFactory.get("creditStep")
-                .<String, String> chunk(1)
+                .<String, String>chunk(1)
                 .reader(multiResourceItemReader())
                 .processor(creditItemProcessor())
                 .writer(itemWriter())
@@ -124,14 +135,10 @@ public class BatchConfig {
     }
 
     @Bean
-    public DownloadFileTasklet downloadFileTasklet() {
-        return new DownloadFileTasklet();
-    }
-
-    @Bean
-    public Step downloadFileStep() {
-        return stepBuilderFactory.get("downloadFileStep")
-                .tasklet(downloadFileTasklet())
+    public Step downloadCreditFileStep() {
+        return stepBuilderFactory.get("downloadCreditFileStep")
+                .listener(new DownloadCreditFileTaskletListener())
+                .tasklet(new DownloadCreditFileTasklet())
                 .build();
     }
 
@@ -139,12 +146,31 @@ public class BatchConfig {
     public Job creditJob() {
         return jobBuilderFactory.get("creditJob")
                 .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep())
+                .start(downloadCreditFileStep())
                 .next(creditStep())
+                .listener(new JobResultListener())
+                .build();
+    }
+    @Bean
+    public Job debitJob() {
+        return jobBuilderFactory.get("debitJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadCreditFileStep())
+                .next(creditStep())
+                .listener(new JobResultListener())
                 .build();
     }
 
     // <--------------------------- Person --------------------------------->
+
+
+
+    @Bean
+    public Step personJobWeekendStep() {
+        return stepBuilderFactory.get("personJobWeekendStep")
+                .tasklet(new PersonJobWeekendTasklet())
+                .build();
+    }
 
     public PersonItemProcessor personItemProcessor() {
         PersonItemProcessor processor = new PersonItemProcessor();
@@ -165,7 +191,7 @@ public class BatchConfig {
     @Bean
     public Step personStep() {
         return stepBuilderFactory.get("personStep")
-                .<Person, Person> chunk(1)
+                .<Person, Person>chunk(1)
                 .reader(itemStreamReader())
                 .processor(personItemProcessor())
                 .writer(personWriter())
@@ -177,11 +203,35 @@ public class BatchConfig {
     }
 
     @Bean
+    public Step downloadPersonFileStep() {
+        return stepBuilderFactory.get("downloadPersonFileStep")
+                .tasklet(new DownloadPersonFileTasklet())
+                .build();
+    }
+
+    @Bean
     public Job personJob() {
         return jobBuilderFactory.get("personJob")
                 .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep())
-                .next(personStep())
+                .start(downloadPersonFileStep())
+                .on("FILENOTFOUND").to(personJobWeekendStep())
+                .from(downloadPersonFileStep())
+                .on("COMPLETED").to(personStep())
+                .end()
+                .listener(new JobResultListener())                
+                .build();
+    }
+
+    @Bean
+    public Job slimPersonJob() {
+        return jobBuilderFactory.get("slimPersonJob")
+                .incrementer(new RunIdIncrementer())
+                .start(downloadPersonFileStep())
+                   .on("COMPLETED").to(personStep())
+                .from(downloadPersonFileStep())
+                   .on("FILENOTFOUND")
+                   .end()                
+                .end()
                 .listener(new JobResultListener())
                 .build();
     }
@@ -189,11 +239,12 @@ public class BatchConfig {
     // <-------- Fim PersonStep com peek -------------->
 
     @Bean
-    public Job jobStepJob() {
+    public Job principalJob() {
         return this.jobBuilderFactory
-                .get("jobStepJob")
+                .get("principalJob")
                 .start(jobStepJobStep1(null))
                 .next(jobStepJobStep2(null))
+                .listener(new JobResultListener())
                 .build();
     }
 

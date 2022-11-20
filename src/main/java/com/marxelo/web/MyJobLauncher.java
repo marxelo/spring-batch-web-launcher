@@ -1,7 +1,7 @@
 package com.marxelo.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.persistence.criteria.CriteriaBuilder.Case;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -13,11 +13,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import lombok.extern.slf4j.Slf4j;
+
 @EnableScheduling
 @Configuration
+@Slf4j
 public class MyJobLauncher {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MyJobLauncher.class);
 
     @Autowired
     private SimpleJobLauncher jobLauncher;
@@ -27,9 +28,15 @@ public class MyJobLauncher {
 
     @Autowired
     private Job creditJob;
+    
+    @Autowired
+    private Job slimPersonJob;
 
     @Autowired
-    private Job jobStepJob;
+    private Job debitJob;
+
+    @Autowired
+    private Job principalJob;
 
     private JobExecution execution;
 
@@ -47,27 +54,63 @@ public class MyJobLauncher {
         String jobStatus;
 
         try {
+            switch (jobName) {
+                case "personJob":
+                    execution = jobLauncher.run(personJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                    break;
+                case "creditJob":
+                    execution = jobLauncher.run(creditJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                    break;
+                case "debitJob":
+                    execution = jobLauncher.run(debitJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                    break;
+                case "slimPersonJob":
+                    execution = jobLauncher.run(slimPersonJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                    break;
+                default:
+                    execution = jobLauncher.run(principalJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                    break;
+            }
+/*
             if (jobName.equals("personJob")) {
                 execution = jobLauncher.run(personJob, new JobParametersBuilder()
                         .addString("fileDate", fileDate)
                         .addString("identifier", identifier)
                         .toJobParameters());
-            }
-            if (jobName.equals("creditJob")) {
-                execution = jobLauncher.run(creditJob, new JobParametersBuilder()
-                        .addString("fileDate", fileDate)
-                        .addString("identifier", identifier)
-                        .toJobParameters());
             } else {
-                execution = jobLauncher.run(jobStepJob, new JobParametersBuilder()
-                        .addString("fileDate", fileDate)
-                        .addString("identifier", identifier)
-                        .toJobParameters());
+                if (jobName.equals("creditJob")) {
+                    execution = jobLauncher.run(creditJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                } else {
+                    execution = jobLauncher.run(principalJob, new JobParametersBuilder()
+                            .addString("fileDate", fileDate)
+                            .addString("identifier", identifier)
+                            .toJobParameters());
+                }
             }
-            LOGGER.info("Job Started");
+  */
+            log.info("Launching job" + jobName);
             jobStatus = execution.getStatus().toString();
         } catch (Exception e) {
             errorMessage.append("Erro ao executar job. ");
+            log.error("Erro ao executar o job " + jobName, e);
             if (e.getMessage() != null) {
                 errorMessage.append("Message: " + e.getMessage() + " ");
             }
